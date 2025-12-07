@@ -40,9 +40,9 @@
 
 | Metric | Score |
 |--------|-------|
-| **Final WattBot Score** | [To be updated] |
-| **Public Leaderboard Rank** | [To be updated] |
-| **Private Leaderboard Rank** | [To be updated] |
+| **Final WattBot Score** | 0.886 |
+| **Public Leaderboard Rank** | 1 |
+| **Private Leaderboard Rank** | 1 |
 
 ---
 
