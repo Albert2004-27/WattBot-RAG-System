@@ -42,9 +42,9 @@
 
 | Metric | Score |
 |--------|-------|
-| **Final WattBot Score** | [To be updated] |
-| **Public Leaderboard Rank** | [To be updated] |
-| **Private Leaderboard Rank** | [To be updated] |
+| **Final WattBot Score** | 0.886 |
+| **Public Leaderboard Rank** | 1 |
+| **Private Leaderboard Rank** | 1 |
 
 ---
 
@@ -136,7 +136,7 @@ Based on our experimental results:
 .
 ├── notebooks/
 │   ├── v1_gemini_2_5pro.ipynb              # Initial pipeline implementation
-│   └── Gemini_2_5_pro_新pipeline_0_821.ipynb  # Optimized version (0.821 score)
+│   └── Gemini_2_5_pro_新pipeline_0_821.ipynb  # Optimized version (0.886 score)
 ├── docs/
 │   ├── WattBot2025_AttentionPlease_Technical_Report.pdf
 │   └── WattBot2025_AttentionPlease_Presentation.pdf
@@ -144,9 +144,6 @@ Based on our experimental results:
 │   ├── metadata.csv                         # Document index
 │   ├── train_QA.csv                         # Training Q&A pairs
 │   └── test_Q.csv                           # Test questions
-├── src/                                     # (Optional) Modular code
-├── outputs/
-│   └── submission.csv                       # Final predictions
 └── README.md
 ```
 
@@ -263,11 +260,11 @@ Progress: 100% |████████████████████| 25
 
 **Team Attention Please**
 
-- **Shao-Hua Wu**‡ - Document Processing & Retrieval System
-- **Xie-Pei Ju**‡ - Hybrid Search Implementation & Optimization
-- **Bo-Hao Chen**‡ - Answer Generation & Prompt Engineering
-- **Yi-Chen Hsiao**∗ - Project Lead & System Architecture
-- **Yi-Yang Xue**† - Evaluation & Performance Analysis
+- **Shao-Hua Wu**‡ - Document Processing & Retrieval System & Project Lead
+- **Xie-Pei Ju**‡ - Document Processing & Retrieval System & Hybrid Search Implementation & Answer Generation & Prompt Engineering & Optimization
+- **Bo-Hao Chen**‡ - Answer Generation & Prompt Engineering & Optimization
+- **Yi-Chen Hsiao**∗ - Report Generation
+- **Yi-Yang Xue**† - Retrieval System & Hybrid Search Implementation 
 
 <sup>‡ Equal contribution</sup>
 
