@@ -2,6 +2,8 @@
 
 <div align="center">
 
+<img src="docs/images/wattbot-logo.png" alt="WattBot — Team Attention Please" width="800">
+
 [![Competition](https://img.shields.io/badge/Kaggle-WattBot%202025-20BEFF?style=for-the-badge&logo=kaggle)](https://www.kaggle.com/competitions/WattBot2025)
 ![Team](https://img.shields.io/badge/Team-Attention%20Please-FF6B6B?style=for-the-badge)
 ![System](https://img.shields.io/badge/System-HERO-9B59B6?style=for-the-badge)
