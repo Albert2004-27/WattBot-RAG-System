@@ -50,15 +50,15 @@ The key finding is the **table paradox**: adding raw tables can introduce noise 
 ## Technology Stack
 
 ```text
-Language:          Python
-Environment:       Jupyter Notebook / Google Colab
-Baseline Parsing:  PyMuPDF + pdfplumber
-HERO Parsing:      Docling + EasyOCR + OpenCV
-Sparse Retrieval:  BM25 (rank-bm25)
-Dense Retrieval:   Sentence-Transformers + BGE-large + FAISS
-Reranking:         BGE-reranker-v2-m3
-Answer Generation: Google Gemini API
-Data Processing:   pandas + NumPy
+Language:             Python
+Environment:          Jupyter Notebook / Google Colab
+Baseline Parsing:     PyMuPDF + pdfplumber
+HERO Parsing:         Docling + EasyOCR + OpenCV
+Sparse Retrieval:     BM25 (rank-bm25)
+Dense Retrieval:      Sentence-Transformers + BGE-large + FAISS
+Reranking:            BGE-reranker-v2-m3
+Answer Generation:    Google Gemini API
+Data Processing:      pandas + NumPy
 ```
 
 The stack above follows the public notebooks. The technical report describes additional experimental configurations.
@@ -522,15 +522,15 @@ WattBot 的核心任務是：**找出支持 AI 永續資訊的實際證據。** 
 ## 技術架構
 
 ```text
-程式語言：     Python
-執行環境：     Jupyter Notebook / Google Colab
-Baseline 解析：PyMuPDF + pdfplumber
-HERO 解析：    Docling + EasyOCR + OpenCV
-稀疏檢索：     BM25 (rank-bm25)
-稠密檢索：     Sentence-Transformers + BGE-large + FAISS
-重排序：       BGE-reranker-v2-m3
-答案生成：     Google Gemini API
-資料處理：     pandas + NumPy
+程式語言：         Python
+執行環境：         Jupyter Notebook / Google Colab
+Baseline 解析：    PyMuPDF + pdfplumber
+HERO 解析：        Docling + EasyOCR + OpenCV
+稀疏檢索：         BM25 (rank-bm25)
+稠密檢索：         Sentence-Transformers + BGE-large + FAISS
+重排序：           BGE-reranker-v2-m3
+答案生成：         Google Gemini API
+資料處理：         pandas + NumPy
 ```
 
 上述設定以公開 notebook 為準；技術報告另包含其他實驗配置。
