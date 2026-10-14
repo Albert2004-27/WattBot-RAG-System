@@ -435,20 +435,15 @@ These are research notebooks with manual configuration, not a packaged command-l
 
 ## Team Members
 
-**Attention Please · National Chengchi University**
+**Team Attention Please**
 
-<table width="100%">
-  <thead><tr><th width="400" align="left">Member</th><th width="400" align="left">Department</th><th width="1200" align="left">Contributions</th></tr></thead>
-  <tbody>
-    <tr><td>Shao-Hua Wu‡</td><td>Money and Banking</td><td>Document processing, retrieval system, project lead</td></tr>
-    <tr><td>Pei-Ju Hsieh‡</td><td>Money and Banking</td><td>Document processing, retrieval system, hybrid search implementation, answer generation, prompt engineering and optimization</td></tr>
-    <tr><td>Bo-Hao Chen‡</td><td>Money and Banking</td><td>Answer generation, prompt engineering and optimization</td></tr>
-    <tr><td>Yi-Chen Hsiao</td><td>Finance</td><td>Report preparation</td></tr>
-    <tr><td>Yi-Yang Xue</td><td>Computer Science</td><td>Retrieval system, hybrid search implementation</td></tr>
-  </tbody>
-</table>
+- **Shao-Hua Wu**‡ - Document Processing & Retrieval System & Project Lead
+- **Xie-Pei Ju**‡ - Document Processing & Retrieval System & Hybrid Search Implementation & Answer Generation & Prompt Engineering & Optimization
+- **Bo-Hao Chen**‡ - Answer Generation & Prompt Engineering & Optimization
+- **Yi-Chen Hsiao**∗ - Report Generation
+- **Yi-Yang Xue**† - Retrieval System & Hybrid Search Implementation
 
-‡ Equal contribution. Names and affiliations follow the technical report; roles follow the original README.
+<sup>‡ Equal contribution</sup>
 
 ## Citation
 
@@ -900,20 +895,15 @@ HERO 生成階段的輸出位置：
 
 ## 團隊成員
 
-**Attention Please · 國立政治大學**
+**Team Attention Please**
 
-<table width="100%">
-  <thead><tr><th width="400" align="left">成員</th><th width="400" align="left">系所</th><th width="1200" align="left">主要貢獻</th></tr></thead>
-  <tbody>
-    <tr><td>Shao-Hua Wu‡</td><td>金融學系</td><td>文件處理、檢索系統、專案統籌</td></tr>
-    <tr><td>Pei-Ju Hsieh‡</td><td>金融學系</td><td>文件處理、檢索系統、混合搜尋實作、答案生成、提示詞設計與優化</td></tr>
-    <tr><td>Bo-Hao Chen‡</td><td>金融學系</td><td>答案生成、提示詞設計與優化</td></tr>
-    <tr><td>Yi-Chen Hsiao</td><td>財務管理學系</td><td>報告製作</td></tr>
-    <tr><td>Yi-Yang Xue</td><td>資訊科學系</td><td>檢索系統、混合搜尋實作</td></tr>
-  </tbody>
-</table>
+- **Shao-Hua Wu**‡ - 文件處理、檢索系統、專案統籌
+- **Xie-Pei Ju**‡ - 文件處理、檢索系統、混合搜尋實作、答案生成、提示詞設計與優化
+- **Bo-Hao Chen**‡ - 答案生成、提示詞設計與優化
+- **Yi-Chen Hsiao**∗ - 報告製作
+- **Yi-Yang Xue**† - 檢索系統、混合搜尋實作
 
-‡ 共同貢獻。姓名與系所依技術報告列示，工作分工沿用原版 README。
+<sup>‡ 共同貢獻</sup>
 
 ## 引用格式
 
