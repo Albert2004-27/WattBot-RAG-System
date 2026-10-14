@@ -318,6 +318,21 @@ Verified for **Attention Please** on October 14, 2026: [official Public leaderbo
 
 The experiments follow three questions: **does including tables help sparse retrieval, does HERO improve evidence retrieval, and do those improvements carry across language models?** Retrieval is evaluated on internal question sets; the model comparison reproduces report scores from the competition, whose test file contains 282 questions. Official Public and Private scores use different subsets of that test set.
 
+### Which Baseline Is Being Compared?
+
+The repository contains several BM25 configurations. Their labels refer to different experiments:
+
+<table width="100%">
+  <thead><tr><th width="600" align="left">Configuration</th><th width="1400" align="left">Meaning</th></tr></thead>
+  <tbody>
+    <tr><td>Hybrid BM25</td><td>Text plus raw Markdown tables; used in the table-paradox experiment.</td></tr>
+    <tr><td>Text-Only BM25</td><td>Tables removed; the control configuration in that experiment.</td></tr>
+    <tr><td>Routed BM25 baseline</td><td>The architecture described above: question-dependent text/table retrieval with a 0.8× table-score weight.</td></tr>
+  </tbody>
+</table>
+
+These names should not be treated as interchangeable. In particular, the baseline values in report Table 16 match the Hybrid BM25 column in Table 1; the report does not establish that they measure the routed notebook implementation. The cross-model comparison follows the report's “Baseline” label, without independently confirming the exact retrieval configuration used for every run.
+
 ### 1. The Table Paradox: Text-Only vs. Hybrid BM25
 
 The baseline experiment compares a hybrid corpus containing text and raw Markdown tables with a text-only corpus. On the **39-query evaluation**, text-only retrieval matches or exceeds the hybrid version on every reported metric.
@@ -347,7 +362,7 @@ Removing raw tables raises Recall@1 by **7.69 percentage points** and MRR by **0
 
 ### 2. HERO Retrieval Performance
 
-The report compares the BM25 baseline with the complete HERO pipeline using coverage, ranking quality, and first-relevant-result position.
+The report compares its labeled BM25 baseline with the complete HERO pipeline using coverage, ranking quality, and first-relevant-result position. The baseline figures correspond to the 39-query Hybrid BM25 results; the final saved HERO notebook evaluation uses 41 queries. The report does not clearly specify a shared evaluation sample for Table 16.
 
 <table width="100%">
   <thead><tr>
@@ -374,6 +389,8 @@ Source: [report Table 16, page 9](docs/WattBot2025_AttentionPlease_Technical_Rep
 - **Coverage:** reported Recall@10 increases from 92.31% to 95.12%, a gain of **2.81 percentage points**.
 - **Early evidence:** Recall@1 increases by **1.00 percentage point**, indicating more questions have a relevant reference at the first retrieved position.
 - **Ranking:** nDCG@10 increases by **0.0048**, while MRR increases by **0.0034** in the report.
+
+**HERO does not lead every BM25 configuration on every retrieval metric.** For example, Text-Only BM25 reports Recall@1 = 87.18% and MRR = 0.8974, higher than the HERO figures above, while HERO reports a slightly higher Recall@10. Because evaluation samples and ranking conventions differ, these figures do not establish a controlled winner. HERO’s demonstrated value here is broader evidence ingestion and the cross-model answer-score improvements reported below.
 
 These are results for the combined pipeline. They do not separately establish the causal contribution of OCR, fusion weights, or reranking; component-level attribution would require additional ablations.
 
@@ -825,6 +842,21 @@ WattBot-RAG-System/
 
 實驗圍繞三個問題：**加入表格是否有利於 BM25、HERO 是否改善證據檢索，以及不同語言模型是否都能受益？** 檢索評估使用內部問題集，模型比較沿用報告中的競賽分數，測試檔案共有 282 題；官方 Public 與 Private 分數各使用其中不同子集。
 
+### 實驗中的 Baseline 指哪個版本？
+
+Repo 保留多種 BM25 配置，以下名稱對應不同實驗：
+
+<table width="100%">
+  <thead><tr><th width="600" align="left">配置</th><th width="1400" align="left">定義</th></tr></thead>
+  <tbody>
+    <tr><td>Hybrid BM25</td><td>文字加原始 Markdown 表格，用於表格悖論實驗。</td></tr>
+    <tr><td>Text-Only BM25</td><td>移除表格，作為同一實驗的對照配置。</td></tr>
+    <tr><td>路由式 BM25 baseline</td><td>前方架構介紹的版本：依問題混合文字／表格檢索，表格分數乘上 0.8。</td></tr>
+  </tbody>
+</table>
+
+這三個名稱不能互換。報告 Table 16 的 Baseline 數值與 Table 1 的 Hybrid BM25 欄相同，但報告未證實這組數值就是路由式 notebook 實作的評估結果。跨模型比較則沿用報告的「Baseline」標籤，尚未逐一確認各次實驗的精確檢索配置。
+
 ### 1. 表格悖論：純文字與混合 BM25 比較
 
 Baseline 比較「文字加原始 Markdown 表格」與「純文字」兩種語料。在 **39 題評估**中，純文字版本的所有指標都優於或等於混合版本。
@@ -854,7 +886,7 @@ Baseline 比較「文字加原始 Markdown 表格」與「純文字」兩種語�
 
 ### 2. HERO 檢索品質
 
-報告以覆蓋率、排序品質與第一個相關結果的位置，比較 BM25 Baseline 與完整 HERO pipeline。
+報告以覆蓋率、排序品質與第一個相關結果的位置，比較其標示的 BM25 Baseline 與完整 HERO pipeline。Baseline 數值對應 39 題的 Hybrid BM25 結果；HERO 最後留存的 notebook 評估使用 41 題。報告未清楚交代 Table 16 是否使用共同評估樣本。
 
 <table width="100%">
   <thead><tr>
@@ -881,6 +913,8 @@ Baseline 比較「文字加原始 Markdown 表格」與「純文字」兩種語�
 - **證據覆蓋率**：Recall@10 從 92.31% 提升至 95.12%，增加 **2.81 個百分點**。
 - **首位命中**：Recall@1 增加 **1.00 個百分點**，代表更多問題能在第一個檢索位置找到相關引用。
 - **排序品質**：報告中的 nDCG@10 增加 **0.0048**，MRR 增加 **0.0034**。
+
+**HERO 並非在所有檢索指標上都勝過每種 BM25 配置。** 例如 Text-Only BM25 的 Recall@1 為 87.18%、MRR 為 0.8974，高於上表 HERO 數值；HERO 的 Recall@10 則略高。由於評估樣本與排名計算方式不同，不能據此判定控制實驗中的優勝者。此處 HERO 的價值在於擴充證據來源，以及下方報告記錄的跨模型答案分數提升。
 
 這些是完整 pipeline 的結果，不能單獨證明 OCR、融合權重或重排序各自造成多少提升；若要分離元件貢獻，仍需要額外消融實驗。
 
