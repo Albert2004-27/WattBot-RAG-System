@@ -51,17 +51,52 @@ The key finding is the **table paradox**: adding raw tables can introduce noise 
 
 ## Technology Stack
 
-```text
-Language:             Python
-Environment:          Jupyter Notebook / Google Colab
-Baseline Parsing:     PyMuPDF + pdfplumber
-HERO Parsing:         Docling + EasyOCR + OpenCV
-Sparse Retrieval:     BM25 (rank-bm25)
-Dense Retrieval:      Sentence-Transformers + BGE-large + FAISS
-Reranking:            BGE-reranker-v2-m3
-Answer Generation:    Google Gemini API
-Data Processing:      pandas + NumPy
-```
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="500" align="left">Component</th>
+      <th width="1500" align="left">Technology</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Language</td>
+      <td>Python</td>
+    </tr>
+    <tr>
+      <td>Environment</td>
+      <td>Jupyter Notebook / Google Colab</td>
+    </tr>
+    <tr>
+      <td>Baseline Parsing</td>
+      <td>PyMuPDF + pdfplumber</td>
+    </tr>
+    <tr>
+      <td>HERO Parsing</td>
+      <td>Docling + EasyOCR + OpenCV</td>
+    </tr>
+    <tr>
+      <td>Sparse Retrieval</td>
+      <td>BM25 (rank-bm25)</td>
+    </tr>
+    <tr>
+      <td>Dense Retrieval</td>
+      <td>Sentence-Transformers + BGE-large + FAISS</td>
+    </tr>
+    <tr>
+      <td>Reranking</td>
+      <td>BGE-reranker-v2-m3</td>
+    </tr>
+    <tr>
+      <td>Answer Generation</td>
+      <td>Google Gemini API</td>
+    </tr>
+    <tr>
+      <td>Data Processing</td>
+      <td>pandas + NumPy</td>
+    </tr>
+  </tbody>
+</table>
 
 The stack above follows the public notebooks. The technical report describes additional experimental configurations.
 
@@ -523,17 +558,52 @@ WattBot 的核心任務是：**找出支持 AI 永續資訊的實際證據。** 
 
 ## 技術架構
 
-```text
-程式語言：         Python
-執行環境：         Jupyter Notebook / Google Colab
-Baseline 解析：    PyMuPDF + pdfplumber
-HERO 解析：        Docling + EasyOCR + OpenCV
-稀疏檢索：         BM25 (rank-bm25)
-稠密檢索：         Sentence-Transformers + BGE-large + FAISS
-重排序：           BGE-reranker-v2-m3
-答案生成：         Google Gemini API
-資料處理：         pandas + NumPy
-```
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="500" align="left">項目</th>
+      <th width="1500" align="left">使用技術</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>程式語言</td>
+      <td>Python</td>
+    </tr>
+    <tr>
+      <td>執行環境</td>
+      <td>Jupyter Notebook / Google Colab</td>
+    </tr>
+    <tr>
+      <td>Baseline 解析</td>
+      <td>PyMuPDF + pdfplumber</td>
+    </tr>
+    <tr>
+      <td>HERO 解析</td>
+      <td>Docling + EasyOCR + OpenCV</td>
+    </tr>
+    <tr>
+      <td>稀疏檢索</td>
+      <td>BM25 (rank-bm25)</td>
+    </tr>
+    <tr>
+      <td>稠密檢索</td>
+      <td>Sentence-Transformers + BGE-large + FAISS</td>
+    </tr>
+    <tr>
+      <td>重排序</td>
+      <td>BGE-reranker-v2-m3</td>
+    </tr>
+    <tr>
+      <td>答案生成</td>
+      <td>Google Gemini API</td>
+    </tr>
+    <tr>
+      <td>資料處理</td>
+      <td>pandas + NumPy</td>
+    </tr>
+  </tbody>
+</table>
 
 上述設定以公開 notebook 為準；技術報告另包含其他實驗配置。
 
