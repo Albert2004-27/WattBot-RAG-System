@@ -153,13 +153,13 @@ WattBot-RAG-System/
 ├── README.md
 ├── notebook/
 │   ├── v1_gemini_2_5pro.ipynb                 # BM25 baseline experiments
-│   └── Gemini_2_5_pro_新pipeline_0_821.ipynb   # HERO pipeline
+│   └── Gemini_2_5_pro_新pipeline_0_821.ipynb  # HERO pipeline
 ├── data/
-│   ├── metadata.csv                         # 32 source documents
-│   ├── train_QA.csv                         # 41 training questions
-│   └── test_Q.csv                           # 282 test questions
+│   ├── metadata.csv                           # 32 source documents
+│   ├── train_QA.csv                           # 41 training questions
+│   └── test_Q.csv                             # 282 test questions
 └── docs/
-    ├── images/                              # Architecture figures
+    ├── images/                                # Architecture figures
     ├── WattBot2025_AttentionPlease_Technical_Report.pdf
     └── WattBot2025_AttentionPlease_Presentation.pdf
 ```
@@ -625,13 +625,13 @@ WattBot-RAG-System/
 ├── README.md
 ├── notebook/
 │   ├── v1_gemini_2_5pro.ipynb                 # BM25 baseline experiments
-│   └── Gemini_2_5_pro_新pipeline_0_821.ipynb   # HERO pipeline
+│   └── Gemini_2_5_pro_新pipeline_0_821.ipynb  # HERO pipeline
 ├── data/
-│   ├── metadata.csv                         # 32 source documents
-│   ├── train_QA.csv                         # 41 training questions
-│   └── test_Q.csv                           # 282 test questions
+│   ├── metadata.csv                           # 32 source documents
+│   ├── train_QA.csv                           # 41 training questions
+│   └── test_Q.csv                             # 282 test questions
 └── docs/
-    ├── images/                              # Architecture figures
+    ├── images/                                # Architecture figures
     ├── WattBot2025_AttentionPlease_Technical_Report.pdf
     └── WattBot2025_AttentionPlease_Presentation.pdf
 ```
