@@ -26,8 +26,8 @@
   - [HERO: Visual-Aware Hybrid Retrieval](#hero-visual-aware-hybrid-retrieval)
   - [Architecture Comparison](#architecture-comparison)
 - [Project Structure](#project-structure)
-- [System Workflow](#system-workflow)
 - [Dataset and Evaluation](#dataset-and-evaluation)
+- [Output Format](#output-format)
 - [Experimental Results](#experimental-results)
 - [Quick Start](#quick-start)
 - [Team Members](#team-members)
@@ -164,65 +164,6 @@ WattBot-RAG-System/
     └── WattBot2025_AttentionPlease_Presentation.pdf
 ```
 
-## System Workflow
-
-```text
-Document preparation
-    ↓
-Download PDFs from metadata.csv
-    ↓
-Parse documents and extract text / tables / figure OCR
-    ↓
-Build retrieval indexes
-    ↓
-Read question and expected answer unit
-    ↓
-Retrieve and rank supporting evidence
-    ↓
-Generate structured answer with citations
-    ↓
-Expand context if the first attempt cannot answer
-    ↓
-Export submission CSV
-```
-
-Generation produces structured JSON, which is mapped to these submission fields:
-
-<table width="100%">
-  <thead>
-    <tr>
-      <th width="1000" align="left">Field</th>
-      <th width="1000" align="left">Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="left"><code>id</code>, <code>question</code></td>
-      <td align="left">Question identifier and text</td>
-    </tr>
-    <tr>
-      <td align="left"><code>answer</code></td>
-      <td align="left">Natural-language answer</td>
-    </tr>
-    <tr>
-      <td align="left"><code>answer_value</code>, <code>answer_unit</code></td>
-      <td align="left">Normalized value and unit</td>
-    </tr>
-    <tr>
-      <td align="left"><code>ref_id</code>, <code>ref_url</code></td>
-      <td align="left">Supporting document IDs and URLs</td>
-    </tr>
-    <tr>
-      <td align="left"><code>supporting_materials</code></td>
-      <td align="left">Evidence excerpt</td>
-    </tr>
-    <tr>
-      <td align="left"><code>explanation</code></td>
-      <td align="left">Explanation connecting evidence to the answer</td>
-    </tr>
-  </tbody>
-</table>
-
 ## Dataset and Evaluation
 
 <table width="100%">
@@ -282,6 +223,45 @@ Source PDFs are downloaded separately using the metadata URLs. The PDFs in `docs
 </table>
 
 The report specifies **±0.1% relative tolerance** for numeric answers.
+
+## Output Format
+
+Generation produces structured JSON, which is mapped to these submission fields:
+
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="1000" align="left">Field</th>
+      <th width="1000" align="left">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left"><code>id</code>, <code>question</code></td>
+      <td align="left">Question identifier and text</td>
+    </tr>
+    <tr>
+      <td align="left"><code>answer</code></td>
+      <td align="left">Natural-language answer</td>
+    </tr>
+    <tr>
+      <td align="left"><code>answer_value</code>, <code>answer_unit</code></td>
+      <td align="left">Normalized value and unit</td>
+    </tr>
+    <tr>
+      <td align="left"><code>ref_id</code>, <code>ref_url</code></td>
+      <td align="left">Supporting document IDs and URLs</td>
+    </tr>
+    <tr>
+      <td align="left"><code>supporting_materials</code></td>
+      <td align="left">Evidence excerpt</td>
+    </tr>
+    <tr>
+      <td align="left"><code>explanation</code></td>
+      <td align="left">Explanation connecting evidence to the answer</td>
+    </tr>
+  </tbody>
+</table>
 
 ## Experimental Results
 
@@ -520,8 +500,8 @@ Related work and acknowledgments are included in the technical report. The repos
   - [HERO：結合視覺證據的混合檢索](#hero結合視覺證據的混合檢索)
   - [架構比較](#架構比較)
 - [專案目錄](#專案目錄)
-- [系統流程](#系統流程)
 - [資料集與評分方式](#資料集與評分方式)
+- [輸出格式](#輸出格式)
 - [實驗成果](#實驗成果)
 - [快速啟動](#快速啟動)
 - [團隊成員與引用](#團隊成員與引用)
@@ -656,65 +636,6 @@ WattBot-RAG-System/
     └── WattBot2025_AttentionPlease_Presentation.pdf
 ```
 
-## 系統流程
-
-```text
-準備文件
-    ↓
-依 metadata.csv 下載 PDF
-    ↓
-解析文字、表格與圖像 OCR
-    ↓
-建立檢索索引
-    ↓
-讀取問題與預期單位
-    ↓
-檢索並排序支持證據
-    ↓
-生成結構化答案與引用
-    ↓
-第一次無法作答時擴大上下文
-    ↓
-匯出 submission CSV
-```
-
-生成器先產生結構化 JSON，再轉換成競賽欄位：
-
-<table width="100%">
-  <thead>
-    <tr>
-      <th width="1000" align="left">欄位</th>
-      <th width="1000" align="left">說明</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="left"><code>id</code>、<code>question</code></td>
-      <td align="left">問題編號與內容</td>
-    </tr>
-    <tr>
-      <td align="left"><code>answer</code></td>
-      <td align="left">自然語言答案</td>
-    </tr>
-    <tr>
-      <td align="left"><code>answer_value</code>、<code>answer_unit</code></td>
-      <td align="left">標準化答案值與單位</td>
-    </tr>
-    <tr>
-      <td align="left"><code>ref_id</code>、<code>ref_url</code></td>
-      <td align="left">支持文件 ID 與網址</td>
-    </tr>
-    <tr>
-      <td align="left"><code>supporting_materials</code></td>
-      <td align="left">證據摘錄</td>
-    </tr>
-    <tr>
-      <td align="left"><code>explanation</code></td>
-      <td align="left">證據如何支持答案</td>
-    </tr>
-  </tbody>
-</table>
-
 ## 資料集與評分方式
 
 <table width="100%">
@@ -774,6 +695,45 @@ WattBot-RAG-System/
 </table>
 
 報告設定數值答案的容許相對誤差為 **±0.1%**。
+
+## 輸出格式
+
+生成器先產生結構化 JSON，再轉換成競賽欄位：
+
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="1000" align="left">欄位</th>
+      <th width="1000" align="left">說明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left"><code>id</code>、<code>question</code></td>
+      <td align="left">問題編號與內容</td>
+    </tr>
+    <tr>
+      <td align="left"><code>answer</code></td>
+      <td align="left">自然語言答案</td>
+    </tr>
+    <tr>
+      <td align="left"><code>answer_value</code>、<code>answer_unit</code></td>
+      <td align="left">標準化答案值與單位</td>
+    </tr>
+    <tr>
+      <td align="left"><code>ref_id</code>、<code>ref_url</code></td>
+      <td align="left">支持文件 ID 與網址</td>
+    </tr>
+    <tr>
+      <td align="left"><code>supporting_materials</code></td>
+      <td align="left">證據摘錄</td>
+    </tr>
+    <tr>
+      <td align="left"><code>explanation</code></td>
+      <td align="left">證據如何支持答案</td>
+    </tr>
+  </tbody>
+</table>
 
 ## 實驗成果
 
