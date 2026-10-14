@@ -1,12 +1,21 @@
-# WattBot 2025 — Retrieval-Augmented Generation for ESG Intelligence
+# WattBot 2025 - Team Attention Please 🔋
 
-## HERO · Hybrid Evidence Retrieval Optimization
+<div align="center">
 
-A retrieval-augmented generation system for extracting verifiable information about AI energy consumption, carbon emissions, and water use from academic papers and industry reports.
+[![Competition](https://img.shields.io/badge/Kaggle-WattBot%202025-20BEFF?style=for-the-badge&logo=kaggle)](https://www.kaggle.com/competitions/WattBot2025)
+![Team](https://img.shields.io/badge/Team-Attention%20Please-FF6B6B?style=for-the-badge)
+![System](https://img.shields.io/badge/System-HERO-9B59B6?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
-Developed by **Team Attention Please** for WattBot 2025 and the Natural Language Processing term project at National Chengchi University.
+### HERO: Hybrid Evidence Retrieval Optimization
 
-[Technical Report](docs/WattBot2025_AttentionPlease_Technical_Report.pdf) · [Presentation](docs/WattBot2025_AttentionPlease_Presentation.pdf) · [Baseline Notebook](notebook/v1_gemini_2_5pro.ipynb) · [HERO Notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb) · [中文版說明](#中文版說明)
+*Evidence-based Energy Estimation for AI Workloads using Retrieval-Augmented Generation*
+
+[📄 Technical Report](docs/WattBot2025_AttentionPlease_Technical_Report.pdf) | [📊 Presentation](docs/WattBot2025_AttentionPlease_Presentation.pdf)
+
+[Baseline Notebook](notebook/v1_gemini_2_5pro.ipynb) · [HERO Notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb) · [繁體中文](#中文版說明)
+
+</div>
 
 ## Table of Contents
 
