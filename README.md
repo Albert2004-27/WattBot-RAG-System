@@ -285,62 +285,125 @@ The report specifies **±0.1% relative tolerance** for numeric answers.
 
 ## Experimental Results
 
-### Pipeline and Model Comparison
+The experiments follow three questions: **does including tables help sparse retrieval, does HERO improve evidence retrieval, and do those improvements carry across language models?** Retrieval is evaluated on internal question sets; end-to-end WattBot Scores are reported for the 282-question competition test set.
+
+### 1. The Table Paradox: Text-Only vs. Hybrid BM25
+
+The baseline experiment compares a hybrid corpus containing text and raw Markdown tables with a text-only corpus. On the **39-query evaluation**, text-only retrieval matches or exceeds the hybrid version on every reported metric.
 
 <table width="100%">
-  <thead>
-    <tr>
-      <th width="500" align="left">Model</th>
-      <th width="750" align="left">BM25 Baseline</th>
-      <th width="750" align="left">HERO</th>
-    </tr>
-  </thead>
+  <thead><tr>
+    <th width="666" align="left">Metric</th>
+    <th width="666" align="left">Hybrid: Text + Tables</th>
+    <th width="666" align="left">Text-Only</th>
+  </tr></thead>
   <tbody>
-    <tr>
-      <td align="left">GPT-4o-mini</td>
-      <td align="right">0.753</td>
-      <td align="right">0.789</td>
-    </tr>
-    <tr>
-      <td align="left">GPT-4o</td>
-      <td align="right">0.768</td>
-      <td align="right">0.811</td>
-    </tr>
-    <tr>
-      <td align="left">GPT-5.1</td>
-      <td align="right">0.778</td>
-      <td align="right">0.807</td>
-    </tr>
-    <tr>
-      <td align="left">Gemini 2.5 Pro</td>
-      <td align="right">0.807</td>
-      <td align="right">0.821</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>Gemini 3 Pro</strong></td>
-      <td align="right"><strong>0.853</strong></td>
-      <td align="right"><strong>0.886</strong></td>
-    </tr>
+    <tr><td align="left">Recall@1</td><td align="right">79.49%</td><td align="right">87.18%</td></tr>
+    <tr><td align="left">Recall@3</td><td align="right">89.74%</td><td align="right">92.31%</td></tr>
+    <tr><td align="left">Recall@5</td><td align="right">92.31%</td><td align="right">92.31%</td></tr>
+    <tr><td align="left">Recall@10</td><td align="right">92.31%</td><td align="right">94.87%</td></tr>
+    <tr><td align="left">nDCG@1</td><td align="right">0.7949</td><td align="right">0.8718</td></tr>
+    <tr><td align="left">nDCG@3</td><td align="right">0.8497</td><td align="right">0.8859</td></tr>
+    <tr><td align="left">nDCG@5</td><td align="right">0.8564</td><td align="right">0.8859</td></tr>
+    <tr><td align="left">nDCG@10</td><td align="right">0.8617</td><td align="right">0.8950</td></tr>
+    <tr><td align="left">MRR</td><td align="right">0.8526</td><td align="right">0.8974</td></tr>
   </tbody>
 </table>
 
-Reported WattBot Scores from [technical report Figure 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10). The best reported configuration is **HERO + Gemini 3 Pro (0.886)**; the public HERO notebook uses **Gemini 2.5 Pro (0.821 in the report)**.
+Source: [report Table 1, page 4](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=4). Here, “hybrid” means text plus tables, not sparse–dense retrieval.
 
-### What We Learned
+Removing raw tables raises Recall@1 by **7.69 percentage points** and MRR by **0.0448**. The report attributes this to table-formatting noise: delimiters and disrupted structure dilute meaningful terms in BM25 scoring. Yet removing tables also removes numerical evidence. This trade-off motivates HERO's structured parsing, dense retrieval, and table-aware weighting.
 
-- **Table formatting affects retrieval.** More document content does not automatically produce better evidence ranking.
-- **Visual evidence needs its own ingestion path.** OCR makes information inside figures available to text retrieval.
-- **Retrieval and generation improve together.** HERO improves reported scores across all five evaluated models.
-- **Context expansion is a trade-off.** A second attempt can recover missed evidence, but requires careful handling of unsupported answers.
+### 2. HERO Retrieval Performance
+
+The report compares the BM25 baseline with the complete HERO pipeline using coverage, ranking quality, and first-relevant-result position.
+
+<table width="100%">
+  <thead><tr>
+    <th width="500" align="left">Metric</th>
+    <th width="500" align="left">Baseline</th>
+    <th width="500" align="left">HERO</th>
+    <th width="500" align="left">Difference</th>
+  </tr></thead>
+  <tbody>
+    <tr><td align="left">Recall@1</td><td align="right">79.49%</td><td align="right">80.49%</td><td align="right">+1.00 pp</td></tr>
+    <tr><td align="left">Recall@3</td><td align="right">89.74%</td><td align="right">89.80%</td><td align="right">+0.06 pp</td></tr>
+    <tr><td align="left">Recall@5</td><td align="right">92.31%</td><td align="right">92.68%</td><td align="right">+0.37 pp</td></tr>
+    <tr><td align="left">Recall@10</td><td align="right">92.31%</td><td align="right">95.12%</td><td align="right">+2.81 pp</td></tr>
+    <tr><td align="left">nDCG@1</td><td align="right">0.7949</td><td align="right">0.8049</td><td align="right">+0.0100</td></tr>
+    <tr><td align="left">nDCG@3</td><td align="right">0.8497</td><td align="right">0.8502</td><td align="right">+0.0005</td></tr>
+    <tr><td align="left">nDCG@5</td><td align="right">0.8564</td><td align="right">0.8584</td><td align="right">+0.0020</td></tr>
+    <tr><td align="left">nDCG@10</td><td align="right">0.8617</td><td align="right">0.8665</td><td align="right">+0.0048</td></tr>
+    <tr><td align="left">MRR</td><td align="right">0.8526</td><td align="right">0.8560</td><td align="right">+0.0034</td></tr>
+  </tbody>
+</table>
+
+Source: [report Table 16, page 9](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=9). **pp** denotes percentage points. Values above reproduce the report; the evaluation caveat below explains differences from the saved notebook run.
+
+- **Coverage:** reported Recall@10 increases from 92.31% to 95.12%, a gain of **2.81 percentage points**.
+- **Early evidence:** Recall@1 increases by **1.00 percentage point**, indicating more questions have a relevant reference at the first retrieved position.
+- **Ranking:** nDCG@10 increases by **0.0048**, while MRR increases by **0.0034** in the report.
+
+These are results for the combined pipeline. They do not separately establish the causal contribution of OCR, fusion weights, or reranking; component-level attribution would require additional ablations.
+
+### 3. Evidence Coverage After Visual-Aware Ingestion
+
+Docling and EasyOCR expand the searchable corpus beyond prose. The report's corpus inventory contains **8,407 chunks**:
+
+<table width="100%">
+  <thead><tr>
+    <th width="666" align="left">Chunk Type</th>
+    <th width="666" align="left">Count</th>
+    <th width="666" align="left">Share</th>
+  </tr></thead>
+  <tbody>
+    <tr><td align="left">Text</td><td align="right">7,817</td><td align="right">93.0%</td></tr>
+    <tr><td align="left">Table</td><td align="right">153</td><td align="right">1.8%</td></tr>
+    <tr><td align="left">Figure OCR</td><td align="right">437</td><td align="right">5.2%</td></tr>
+    <tr><td align="left">Total</td><td align="right">8,407</td><td align="right">100%</td></tr>
+  </tbody>
+</table>
+
+Source: [report Table 8, page 6](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=6). OCR contributes 437 figure-derived chunks, while 153 chunks preserve table content. Content labels allow the retrieval system to weight these sources differently from prose.
+
+The report conclusion gives a different visual-chunk total; this inventory consistently follows Table 8. Corpus counts describe evidence availability, not a measured standalone OCR accuracy gain.
+
+### 4. Pipeline and Model Comparison
+
+<table width="100%">
+  <thead><tr>
+    <th width="500" align="left">Model</th>
+    <th width="500" align="left">BM25 Baseline</th>
+    <th width="500" align="left">HERO</th>
+    <th width="500" align="left">Score Gain</th>
+  </tr></thead>
+  <tbody>
+    <tr><td align="left">GPT-4o-mini</td><td align="right">0.753</td><td align="right">0.789</td><td align="right">+0.036</td></tr>
+    <tr><td align="left">GPT-4o</td><td align="right">0.768</td><td align="right">0.811</td><td align="right">+0.043</td></tr>
+    <tr><td align="left">GPT-5.1</td><td align="right">0.778</td><td align="right">0.807</td><td align="right">+0.029</td></tr>
+    <tr><td align="left">Gemini 2.5 Pro</td><td align="right">0.807</td><td align="right">0.821</td><td align="right">+0.014</td></tr>
+    <tr><td align="left">Gemini 3 Pro</td><td align="right">0.853</td><td align="right">0.886</td><td align="right">+0.033</td></tr>
+  </tbody>
+</table>
+
+Source: [report Figure 5, page 10](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10). All five tested models improve with HERO.
+
+**GPT-4o has the largest absolute gain (+0.043)**, while **Gemini 3 Pro achieves the highest final score (0.886)**. Gemini 3 Pro rises from 0.853 to 0.886, showing that retrieval improvements remain useful with a stronger answer model. Gemini 2.5 Pro rises from 0.807 to 0.821; this is the model initialized in the public HERO notebook.
+
+### 5. Conclusions and Future Work
+
+The experiments connect the table-noise problem to a practical retrieval redesign: preserve text, tables, and OCR as distinct evidence types; combine lexical and semantic search; rerank candidates; and adapt the answer context to the question.
+
+The report proposes **learned fusion weights**, **multilingual corpora**, and **hierarchical indexing for larger collections** as future directions. The current weights and question routing remain heuristic. The two-stage generation design balances an initial narrow context against a broader fallback, but its independent benefit is not quantified in these tables.
 
 <details>
-<summary>Retrieval evaluation and reproducibility details</summary>
+<summary>Evaluation scope and reproducibility details</summary>
 
-The baseline comparison uses 39 questions; the final saved HERO evaluation uses 41, including unanswerable examples. The HERO saved output reports Recall@10 of 95.12% and MRR of 0.8519. Some report values differ, so these runs should not be treated as a controlled comparison on identical samples.
+The baseline table experiment uses 39 queries. The final saved HERO evaluation uses 41, including unanswerable examples. Its saved values include Recall@3 = 87.80%, nDCG@3 = 0.8384, and MRR = 0.8519, differing from report Table 16. The report comparison should therefore be read as reported results rather than a newly verified same-sample evaluation; the text-only baseline also performs better on some metrics than the HERO figures shown above.
 
-The notebooks label a top-K reference hit rate as Recall@K. Multiple chunks may come from the same document, so chunk ranking and unique-document ranking differ.
+The notebook's Recall@K is an any-reference hit rate. Multiple chunks can come from the same document; chunk ranks and unique-document ranks are not interchangeable. The saved evaluation includes unanswerable entries, which also affects interpretation.
 
-The public HERO retrieval defaults to eight final chunks. Generation can request up to ten fallback chunks, but only uses the evidence supplied. Its query-based helper currently enables reranking for every query. Abstention uses heuristics and LLM responses rather than calibrated confidence.
+The public HERO pipeline defaults to eight final retrieval chunks; a generation request for ten fallback chunks can only use those supplied. Reranking is currently enabled for every query. Abstention uses heuristics and LLM responses rather than calibrated confidence. These figures are taken from the report and saved outputs, not a new execution of the models or competition evaluator.
 
 </details>
 
@@ -714,62 +777,125 @@ WattBot-RAG-System/
 
 ## 實驗成果
 
-### 不同模型與 Pipeline 比較
+實驗圍繞三個問題：**加入表格是否有利於 BM25、HERO 是否改善證據檢索，以及不同語言模型是否都能受益？** 檢索評估使用內部問題集，最終 WattBot Score 則來自 282 題競賽測試集的報告結果。
+
+### 1. 表格悖論：純文字與混合 BM25 比較
+
+Baseline 比較「文字加原始 Markdown 表格」與「純文字」兩種語料。在 **39 題評估**中，純文字版本的所有指標都優於或等於混合版本。
 
 <table width="100%">
-  <thead>
-    <tr>
-      <th width="500" align="left">Model</th>
-      <th width="750" align="left">BM25 Baseline</th>
-      <th width="750" align="left">HERO</th>
-    </tr>
-  </thead>
+  <thead><tr>
+    <th width="666" align="left">指標</th>
+    <th width="666" align="left">混合：文字＋表格</th>
+    <th width="666" align="left">純文字</th>
+  </tr></thead>
   <tbody>
-    <tr>
-      <td align="left">GPT-4o-mini</td>
-      <td align="right">0.753</td>
-      <td align="right">0.789</td>
-    </tr>
-    <tr>
-      <td align="left">GPT-4o</td>
-      <td align="right">0.768</td>
-      <td align="right">0.811</td>
-    </tr>
-    <tr>
-      <td align="left">GPT-5.1</td>
-      <td align="right">0.778</td>
-      <td align="right">0.807</td>
-    </tr>
-    <tr>
-      <td align="left">Gemini 2.5 Pro</td>
-      <td align="right">0.807</td>
-      <td align="right">0.821</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>Gemini 3 Pro</strong></td>
-      <td align="right"><strong>0.853</strong></td>
-      <td align="right"><strong>0.886</strong></td>
-    </tr>
+    <tr><td align="left">Recall@1</td><td align="right">79.49%</td><td align="right">87.18%</td></tr>
+    <tr><td align="left">Recall@3</td><td align="right">89.74%</td><td align="right">92.31%</td></tr>
+    <tr><td align="left">Recall@5</td><td align="right">92.31%</td><td align="right">92.31%</td></tr>
+    <tr><td align="left">Recall@10</td><td align="right">92.31%</td><td align="right">94.87%</td></tr>
+    <tr><td align="left">nDCG@1</td><td align="right">0.7949</td><td align="right">0.8718</td></tr>
+    <tr><td align="left">nDCG@3</td><td align="right">0.8497</td><td align="right">0.8859</td></tr>
+    <tr><td align="left">nDCG@5</td><td align="right">0.8564</td><td align="right">0.8859</td></tr>
+    <tr><td align="left">nDCG@10</td><td align="right">0.8617</td><td align="right">0.8950</td></tr>
+    <tr><td align="left">MRR</td><td align="right">0.8526</td><td align="right">0.8974</td></tr>
   </tbody>
 </table>
 
-成績來自[技術報告 Figure 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10)。最佳配置為 **HERO + Gemini 3 Pro（0.886）**；公開 HERO notebook 使用 **Gemini 2.5 Pro（報告成績 0.821）**。
+來源：[報告第 4 頁 Table 1](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=4)。這裡的 hybrid 指文字與表格混合，不是稀疏與稠密檢索。
 
-### 主要發現
+移除原始表格後，Recall@1 提高 **7.69 個百分點**，MRR 增加 **0.0448**。報告將原因歸於表格格式雜訊：分隔符號與破碎結構稀釋關鍵詞的 BM25 訊號。然而，刪除表格也會失去數值證據。這個取捨促成 HERO 的結構化解析、語意檢索與表格加權設計。
 
-- **表格格式會影響檢索。** 增加內容不一定能提升證據排序品質。
-- **視覺資訊需要獨立擷取。** OCR 讓圖像中的資訊進入文字檢索流程。
-- **檢索與生成需要一起優化。** 報告中五種模型搭配 HERO 都有成績提升。
-- **擴大上下文需要取捨。** 第二次生成能補回遺漏證據，也需要避免無證據推論。
+### 2. HERO 檢索品質
+
+報告以覆蓋率、排序品質與第一個相關結果的位置，比較 BM25 Baseline 與完整 HERO pipeline。
+
+<table width="100%">
+  <thead><tr>
+    <th width="500" align="left">指標</th>
+    <th width="500" align="left">Baseline</th>
+    <th width="500" align="left">HERO</th>
+    <th width="500" align="left">差異</th>
+  </tr></thead>
+  <tbody>
+    <tr><td align="left">Recall@1</td><td align="right">79.49%</td><td align="right">80.49%</td><td align="right">+1.00 pp</td></tr>
+    <tr><td align="left">Recall@3</td><td align="right">89.74%</td><td align="right">89.80%</td><td align="right">+0.06 pp</td></tr>
+    <tr><td align="left">Recall@5</td><td align="right">92.31%</td><td align="right">92.68%</td><td align="right">+0.37 pp</td></tr>
+    <tr><td align="left">Recall@10</td><td align="right">92.31%</td><td align="right">95.12%</td><td align="right">+2.81 pp</td></tr>
+    <tr><td align="left">nDCG@1</td><td align="right">0.7949</td><td align="right">0.8049</td><td align="right">+0.0100</td></tr>
+    <tr><td align="left">nDCG@3</td><td align="right">0.8497</td><td align="right">0.8502</td><td align="right">+0.0005</td></tr>
+    <tr><td align="left">nDCG@5</td><td align="right">0.8564</td><td align="right">0.8584</td><td align="right">+0.0020</td></tr>
+    <tr><td align="left">nDCG@10</td><td align="right">0.8617</td><td align="right">0.8665</td><td align="right">+0.0048</td></tr>
+    <tr><td align="left">MRR</td><td align="right">0.8526</td><td align="right">0.8560</td><td align="right">+0.0034</td></tr>
+  </tbody>
+</table>
+
+來源：[報告第 9 頁 Table 16](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=9)。**pp 表示百分點**。上表忠實呈現報告值，與 notebook 留存輸出的差異另列於下方評估說明。
+
+- **證據覆蓋率**：Recall@10 從 92.31% 提升至 95.12%，增加 **2.81 個百分點**。
+- **首位命中**：Recall@1 增加 **1.00 個百分點**，代表更多問題能在第一個檢索位置找到相關引用。
+- **排序品質**：報告中的 nDCG@10 增加 **0.0048**，MRR 增加 **0.0034**。
+
+這些是完整 pipeline 的結果，不能單獨證明 OCR、融合權重或重排序各自造成多少提升；若要分離元件貢獻，仍需要額外消融實驗。
+
+### 3. 視覺證據擷取後的語料組成
+
+Docling 與 EasyOCR 將可搜尋內容從一般段落擴展至表格和圖像文字。報告的語料統計共 **8,407 個區塊**：
+
+<table width="100%">
+  <thead><tr>
+    <th width="666" align="left">區塊類型</th>
+    <th width="666" align="left">數量</th>
+    <th width="666" align="left">占比</th>
+  </tr></thead>
+  <tbody>
+    <tr><td align="left">文字</td><td align="right">7,817</td><td align="right">93.0%</td></tr>
+    <tr><td align="left">表格</td><td align="right">153</td><td align="right">1.8%</td></tr>
+    <tr><td align="left">圖像 OCR</td><td align="right">437</td><td align="right">5.2%</td></tr>
+    <tr><td align="left">總計</td><td align="right">8,407</td><td align="right">100%</td></tr>
+  </tbody>
+</table>
+
+來源：[報告第 6 頁 Table 8](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=6)。其中 437 個區塊來自圖像 OCR，153 個區塊保留表格內容。類型標籤讓檢索階段能為不同證據來源配置權重。
+
+報告結論另列不同的視覺區塊總數；此處統一採用 Table 8。區塊數反映可用證據規模，並不等於已量測的 OCR 獨立準確率提升。
+
+### 4. 不同模型與 Pipeline 比較
+
+<table width="100%">
+  <thead><tr>
+    <th width="500" align="left">模型</th>
+    <th width="500" align="left">BM25 Baseline</th>
+    <th width="500" align="left">HERO</th>
+    <th width="500" align="left">分數提升</th>
+  </tr></thead>
+  <tbody>
+    <tr><td align="left">GPT-4o-mini</td><td align="right">0.753</td><td align="right">0.789</td><td align="right">+0.036</td></tr>
+    <tr><td align="left">GPT-4o</td><td align="right">0.768</td><td align="right">0.811</td><td align="right">+0.043</td></tr>
+    <tr><td align="left">GPT-5.1</td><td align="right">0.778</td><td align="right">0.807</td><td align="right">+0.029</td></tr>
+    <tr><td align="left">Gemini 2.5 Pro</td><td align="right">0.807</td><td align="right">0.821</td><td align="right">+0.014</td></tr>
+    <tr><td align="left">Gemini 3 Pro</td><td align="right">0.853</td><td align="right">0.886</td><td align="right">+0.033</td></tr>
+  </tbody>
+</table>
+
+來源：[報告第 10 頁 Figure 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10)。五種模型搭配 HERO 均有成績提升。
+
+**GPT-4o 的絕對提升最大（+0.043）**，**Gemini 3 Pro 的最終分數最高（0.886）**。Gemini 3 Pro 從 0.853 提升至 0.886，說明即使搭配較強的生成模型，改善證據檢索仍有幫助。Gemini 2.5 Pro 則從 0.807 提升至 0.821，也是公開 HERO notebook 初始化使用的模型。
+
+### 5. 結論與未來方向
+
+實驗呈現從表格雜訊到檢索改造的完整脈絡：保留文字、表格與 OCR 類型，結合詞彙與語意搜尋，再重排序候選證據，依問題調整生成上下文。
+
+報告提出未來可研究**學習式融合權重**、**多語言語料**與**大型文件集合的階層索引**。目前權重與問題路由仍是啟發式規則；兩階段生成在較小上下文與較廣 fallback 之間取捨，但上表未量化其獨立效果。
 
 <details>
-<summary>檢索評估與重現細節</summary>
+<summary>評估範圍與重現細節</summary>
 
-Baseline 比較使用 39 題，HERO 最後留存的評估使用 41 題，包含不可回答問題。HERO 輸出記錄 Recall@10 為 95.12%、MRR 為 0.8519，部分報告數值不同，因此不能視為同一樣本上的控制比較。
+Baseline 表格實驗使用 39 題；HERO 最後留存的評估使用 41 題，包含不可回答問題。其輸出記錄 Recall@3 為 87.80%、nDCG@3 為 0.8384、MRR 為 0.8519，與報告 Table 16 不同。因此報告比較應視為文件記錄的結果，而非本次驗證的同樣本實驗；純文字 baseline 在部分指標上也高於上述 HERO 數值。
 
-Notebook 將前 K 個結果命中任一標準引用的比例稱為 Recall@K；多個區塊可能來自同一文件，區塊排名與去重後的文件排名不同。
+Notebook 的 Recall@K 判斷前 K 個結果是否命中任一標準引用，實際上是命中率。多個區塊可來自同一文件，區塊排名與去重文件排名不能混用。留存評估也包含不可回答問題，會影響指標解讀。
 
-公開 HERO 檢索預設保留八個最終區塊。生成器雖可要求最多十個 fallback 區塊，仍受實際傳入證據數量限制。目前 query-based helper 對所有問題啟用重排序。拒答使用規則與 LLM 回應，不是經過校準的信心估計。
+公開 HERO 檢索預設保留八個最終區塊；生成器要求十個 fallback 區塊時，仍只能使用實際傳入的內容。目前所有問題均啟用重排序，拒答由規則與 LLM 回應決定，不是校準後的信心估計。本節數據來自報告與留存輸出，沒有重新執行模型或競賽評分。
 
 </details>
 
