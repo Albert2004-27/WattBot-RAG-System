@@ -99,15 +99,52 @@ The original report figure labels the embedding model as **BGE-M3**. The public 
 
 ### Architecture Comparison
 
-| Component | BM25 Baseline | HERO |
-| :--- | :--- | :--- |
-| Document parsing | PyMuPDF / pdfplumber | Docling + EasyOCR |
-| Evidence sources | Text and tables | Text, tables, and figure OCR |
-| Retrieval | Text/table BM25 indexes | BM25 + dense vector search |
-| Table handling | BM25 score weight ×0.8 | RRF weight ×2.0 |
-| Ranking | Weighted BM25 scores | Weighted RRF + CrossEncoder |
-| Query adaptation | Table-related routing | Unit expansion and metadata hints |
-| Generation | Two-stage fallback | Type-specific prompts and two-stage fallback |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="500" align="left">Component</th>
+      <th width="750" align="left">BM25 Baseline</th>
+      <th width="750" align="left">HERO</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">Document parsing</td>
+      <td align="left">PyMuPDF / pdfplumber</td>
+      <td align="left">Docling + EasyOCR</td>
+    </tr>
+    <tr>
+      <td align="left">Evidence sources</td>
+      <td align="left">Text and tables</td>
+      <td align="left">Text, tables, and figure OCR</td>
+    </tr>
+    <tr>
+      <td align="left">Retrieval</td>
+      <td align="left">Text/table BM25 indexes</td>
+      <td align="left">BM25 + dense vector search</td>
+    </tr>
+    <tr>
+      <td align="left">Table handling</td>
+      <td align="left">BM25 score weight ×0.8</td>
+      <td align="left">RRF weight ×2.0</td>
+    </tr>
+    <tr>
+      <td align="left">Ranking</td>
+      <td align="left">Weighted BM25 scores</td>
+      <td align="left">Weighted RRF + CrossEncoder</td>
+    </tr>
+    <tr>
+      <td align="left">Query adaptation</td>
+      <td align="left">Table-related routing</td>
+      <td align="left">Unit expansion and metadata hints</td>
+    </tr>
+    <tr>
+      <td align="left">Generation</td>
+      <td align="left">Two-stage fallback</td>
+      <td align="left">Type-specific prompts and two-stage fallback</td>
+    </tr>
+  </tbody>
+</table>
 
 ## Project Structure
 
@@ -151,30 +188,98 @@ Export submission CSV
 
 Generation produces structured JSON, which is mapped to these submission fields:
 
-| Field | Description |
-| :--- | :--- |
-| `id`, `question` | Question identifier and text |
-| `answer` | Natural-language answer |
-| `answer_value`, `answer_unit` | Normalized value and unit |
-| `ref_id`, `ref_url` | Supporting document IDs and URLs |
-| `supporting_materials` | Evidence excerpt |
-| `explanation` | Explanation connecting evidence to the answer |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="1000" align="left">Field</th>
+      <th width="1000" align="left">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left"><code>id</code>, <code>question</code></td>
+      <td align="left">Question identifier and text</td>
+    </tr>
+    <tr>
+      <td align="left"><code>answer</code></td>
+      <td align="left">Natural-language answer</td>
+    </tr>
+    <tr>
+      <td align="left"><code>answer_value</code>, <code>answer_unit</code></td>
+      <td align="left">Normalized value and unit</td>
+    </tr>
+    <tr>
+      <td align="left"><code>ref_id</code>, <code>ref_url</code></td>
+      <td align="left">Supporting document IDs and URLs</td>
+    </tr>
+    <tr>
+      <td align="left"><code>supporting_materials</code></td>
+      <td align="left">Evidence excerpt</td>
+    </tr>
+    <tr>
+      <td align="left"><code>explanation</code></td>
+      <td align="left">Explanation connecting evidence to the answer</td>
+    </tr>
+  </tbody>
+</table>
 
 ## Dataset and Evaluation
 
-| File | Records | Content |
-| :--- | ---: | :--- |
-| `metadata.csv` | 32 | Document metadata and source URLs |
-| `train_QA.csv` | 41 | Questions with answers, citations, and evidence |
-| `test_Q.csv` | 282 | Test questions and expected units |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="500" align="left">File</th>
+      <th width="750" align="left">Records</th>
+      <th width="750" align="left">Content</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left"><code>metadata.csv</code></td>
+      <td align="right">32</td>
+      <td align="left">Document metadata and source URLs</td>
+    </tr>
+    <tr>
+      <td align="left"><code>train_QA.csv</code></td>
+      <td align="right">41</td>
+      <td align="left">Questions with answers, citations, and evidence</td>
+    </tr>
+    <tr>
+      <td align="left"><code>test_Q.csv</code></td>
+      <td align="right">282</td>
+      <td align="left">Test questions and expected units</td>
+    </tr>
+  </tbody>
+</table>
 
 Source PDFs are downloaded separately using the metadata URLs. The PDFs in `docs/` are the project report and presentation.
 
-| WattBot Score component | Weight | Criterion |
-| :--- | ---: | :--- |
-| Answer value | 75% | Numeric tolerance or normalized categorical match |
-| Reference IDs | 15% | Jaccard overlap of citation sets |
-| Unanswerable handling | 10% | Correct recognition of unavailable evidence |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="500" align="left">WattBot Score component</th>
+      <th width="750" align="left">Weight</th>
+      <th width="750" align="left">Criterion</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">Answer value</td>
+      <td align="right">75%</td>
+      <td align="left">Numeric tolerance or normalized categorical match</td>
+    </tr>
+    <tr>
+      <td align="left">Reference IDs</td>
+      <td align="right">15%</td>
+      <td align="left">Jaccard overlap of citation sets</td>
+    </tr>
+    <tr>
+      <td align="left">Unanswerable handling</td>
+      <td align="right">10%</td>
+      <td align="left">Correct recognition of unavailable evidence</td>
+    </tr>
+  </tbody>
+</table>
 
 The report specifies **±0.1% relative tolerance** for numeric answers.
 
@@ -182,13 +287,42 @@ The report specifies **±0.1% relative tolerance** for numeric answers.
 
 ### Pipeline and Model Comparison
 
-| Model | BM25 Baseline | HERO |
-| :--- | ---: | ---: |
-| GPT-4o-mini | 0.753 | 0.789 |
-| GPT-4o | 0.768 | 0.811 |
-| GPT-5.1 | 0.778 | 0.807 |
-| Gemini 2.5 Pro | 0.807 | 0.821 |
-| **Gemini 3 Pro** | **0.853** | **0.886** |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="500" align="left">Model</th>
+      <th width="750" align="left">BM25 Baseline</th>
+      <th width="750" align="left">HERO</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">GPT-4o-mini</td>
+      <td align="right">0.753</td>
+      <td align="right">0.789</td>
+    </tr>
+    <tr>
+      <td align="left">GPT-4o</td>
+      <td align="right">0.768</td>
+      <td align="right">0.811</td>
+    </tr>
+    <tr>
+      <td align="left">GPT-5.1</td>
+      <td align="right">0.778</td>
+      <td align="right">0.807</td>
+    </tr>
+    <tr>
+      <td align="left">Gemini 2.5 Pro</td>
+      <td align="right">0.807</td>
+      <td align="right">0.821</td>
+    </tr>
+    <tr>
+      <td align="left"><strong>Gemini 3 Pro</strong></td>
+      <td align="right"><strong>0.853</strong></td>
+      <td align="right"><strong>0.886</strong></td>
+    </tr>
+  </tbody>
+</table>
 
 Reported WattBot Scores from [technical report Figure 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10). The best reported configuration is **HERO + Gemini 3 Pro (0.886)**; the public HERO notebook uses **Gemini 2.5 Pro (0.821 in the report)**.
 
@@ -258,13 +392,36 @@ These are research notebooks with manual configuration, not a packaged command-l
 
 **Attention Please · National Chengchi University**
 
-| Member | Affiliation in the technical report |
-| :--- | :--- |
-| Shao-Hua Wu‡ | Department of Money and Banking |
-| Pei-Ju Hsieh‡ | Department of Money and Banking |
-| Bo-Hao Chen‡ | Department of Money and Banking |
-| Yi-Chen Hsiao | Department of Finance |
-| Yi-Yang Xue | Department of Computer Science |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="1000" align="left">Member</th>
+      <th width="1000" align="left">Affiliation in the technical report</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">Shao-Hua Wu‡</td>
+      <td align="left">Department of Money and Banking</td>
+    </tr>
+    <tr>
+      <td align="left">Pei-Ju Hsieh‡</td>
+      <td align="left">Department of Money and Banking</td>
+    </tr>
+    <tr>
+      <td align="left">Bo-Hao Chen‡</td>
+      <td align="left">Department of Money and Banking</td>
+    </tr>
+    <tr>
+      <td align="left">Yi-Chen Hsiao</td>
+      <td align="left">Department of Finance</td>
+    </tr>
+    <tr>
+      <td align="left">Yi-Yang Xue</td>
+      <td align="left">Department of Computer Science</td>
+    </tr>
+  </tbody>
+</table>
 
 ‡ Equal contribution, as marked in the technical report.
 
@@ -371,15 +528,52 @@ HERO 在 Baseline 基礎上加入五個階段：
 
 ### 架構比較
 
-| 元件 | BM25 Baseline | HERO |
-| :--- | :--- | :--- |
-| 文件解析 | PyMuPDF / pdfplumber | Docling + EasyOCR |
-| 證據來源 | 文字與表格 | 文字、表格與圖像 OCR |
-| 檢索方式 | 文字／表格 BM25 索引 | BM25 + 稠密向量搜尋 |
-| 表格處理 | BM25 分數權重 ×0.8 | RRF 權重 ×2.0 |
-| 結果排序 | 加權 BM25 分數 | 加權 RRF + CrossEncoder |
-| 查詢調整 | 表格相關問題路由 | 單位擴展與元資料提示 |
-| 答案生成 | 兩階段 fallback | 題型提示詞與兩階段 fallback |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="500" align="left">元件</th>
+      <th width="750" align="left">BM25 Baseline</th>
+      <th width="750" align="left">HERO</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">文件解析</td>
+      <td align="left">PyMuPDF / pdfplumber</td>
+      <td align="left">Docling + EasyOCR</td>
+    </tr>
+    <tr>
+      <td align="left">證據來源</td>
+      <td align="left">文字與表格</td>
+      <td align="left">文字、表格與圖像 OCR</td>
+    </tr>
+    <tr>
+      <td align="left">檢索方式</td>
+      <td align="left">文字／表格 BM25 索引</td>
+      <td align="left">BM25 + 稠密向量搜尋</td>
+    </tr>
+    <tr>
+      <td align="left">表格處理</td>
+      <td align="left">BM25 分數權重 ×0.8</td>
+      <td align="left">RRF 權重 ×2.0</td>
+    </tr>
+    <tr>
+      <td align="left">結果排序</td>
+      <td align="left">加權 BM25 分數</td>
+      <td align="left">加權 RRF + CrossEncoder</td>
+    </tr>
+    <tr>
+      <td align="left">查詢調整</td>
+      <td align="left">表格相關問題路由</td>
+      <td align="left">單位擴展與元資料提示</td>
+    </tr>
+    <tr>
+      <td align="left">答案生成</td>
+      <td align="left">兩階段 fallback</td>
+      <td align="left">題型提示詞與兩階段 fallback</td>
+    </tr>
+  </tbody>
+</table>
 
 ## 專案目錄
 
@@ -423,30 +617,98 @@ WattBot-RAG-System/
 
 生成器先產生結構化 JSON，再轉換成競賽欄位：
 
-| 欄位 | 說明 |
-| :--- | :--- |
-| `id`、`question` | 問題編號與內容 |
-| `answer` | 自然語言答案 |
-| `answer_value`、`answer_unit` | 標準化答案值與單位 |
-| `ref_id`、`ref_url` | 支持文件 ID 與網址 |
-| `supporting_materials` | 證據摘錄 |
-| `explanation` | 證據如何支持答案 |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="1000" align="left">欄位</th>
+      <th width="1000" align="left">說明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left"><code>id</code>、<code>question</code></td>
+      <td align="left">問題編號與內容</td>
+    </tr>
+    <tr>
+      <td align="left"><code>answer</code></td>
+      <td align="left">自然語言答案</td>
+    </tr>
+    <tr>
+      <td align="left"><code>answer_value</code>、<code>answer_unit</code></td>
+      <td align="left">標準化答案值與單位</td>
+    </tr>
+    <tr>
+      <td align="left"><code>ref_id</code>、<code>ref_url</code></td>
+      <td align="left">支持文件 ID 與網址</td>
+    </tr>
+    <tr>
+      <td align="left"><code>supporting_materials</code></td>
+      <td align="left">證據摘錄</td>
+    </tr>
+    <tr>
+      <td align="left"><code>explanation</code></td>
+      <td align="left">證據如何支持答案</td>
+    </tr>
+  </tbody>
+</table>
 
 ## 資料集與評分方式
 
-| 檔案 | 筆數 | 內容 |
-| :--- | ---: | :--- |
-| `metadata.csv` | 32 | 文件資訊與來源網址 |
-| `train_QA.csv` | 41 | 問題、標準答案、引用與證據 |
-| `test_Q.csv` | 282 | 測試問題與預期單位 |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="500" align="left">檔案</th>
+      <th width="750" align="left">筆數</th>
+      <th width="750" align="left">內容</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left"><code>metadata.csv</code></td>
+      <td align="right">32</td>
+      <td align="left">文件資訊與來源網址</td>
+    </tr>
+    <tr>
+      <td align="left"><code>train_QA.csv</code></td>
+      <td align="right">41</td>
+      <td align="left">問題、標準答案、引用與證據</td>
+    </tr>
+    <tr>
+      <td align="left"><code>test_Q.csv</code></td>
+      <td align="right">282</td>
+      <td align="left">測試問題與預期單位</td>
+    </tr>
+  </tbody>
+</table>
 
 原始文獻需依 metadata 網址另外下載；`docs/` 的 PDF 是專案報告與簡報。
 
-| WattBot Score 項目 | 權重 | 評分依據 |
-| :--- | ---: | :--- |
-| 答案值 | 75% | 數值誤差或標準化類別比對 |
-| 引用文件 | 15% | 引用集合的 Jaccard overlap |
-| 無法作答判定 | 10% | 正確辨識缺乏證據的問題 |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="500" align="left">WattBot Score 項目</th>
+      <th width="750" align="left">權重</th>
+      <th width="750" align="left">評分依據</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">答案值</td>
+      <td align="right">75%</td>
+      <td align="left">數值誤差或標準化類別比對</td>
+    </tr>
+    <tr>
+      <td align="left">引用文件</td>
+      <td align="right">15%</td>
+      <td align="left">引用集合的 Jaccard overlap</td>
+    </tr>
+    <tr>
+      <td align="left">無法作答判定</td>
+      <td align="right">10%</td>
+      <td align="left">正確辨識缺乏證據的問題</td>
+    </tr>
+  </tbody>
+</table>
 
 報告設定數值答案的容許相對誤差為 **±0.1%**。
 
@@ -454,13 +716,42 @@ WattBot-RAG-System/
 
 ### 不同模型與 Pipeline 比較
 
-| Model | BM25 Baseline | HERO |
-| :--- | ---: | ---: |
-| GPT-4o-mini | 0.753 | 0.789 |
-| GPT-4o | 0.768 | 0.811 |
-| GPT-5.1 | 0.778 | 0.807 |
-| Gemini 2.5 Pro | 0.807 | 0.821 |
-| **Gemini 3 Pro** | **0.853** | **0.886** |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="500" align="left">Model</th>
+      <th width="750" align="left">BM25 Baseline</th>
+      <th width="750" align="left">HERO</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">GPT-4o-mini</td>
+      <td align="right">0.753</td>
+      <td align="right">0.789</td>
+    </tr>
+    <tr>
+      <td align="left">GPT-4o</td>
+      <td align="right">0.768</td>
+      <td align="right">0.811</td>
+    </tr>
+    <tr>
+      <td align="left">GPT-5.1</td>
+      <td align="right">0.778</td>
+      <td align="right">0.807</td>
+    </tr>
+    <tr>
+      <td align="left">Gemini 2.5 Pro</td>
+      <td align="right">0.807</td>
+      <td align="right">0.821</td>
+    </tr>
+    <tr>
+      <td align="left"><strong>Gemini 3 Pro</strong></td>
+      <td align="right"><strong>0.853</strong></td>
+      <td align="right"><strong>0.886</strong></td>
+    </tr>
+  </tbody>
+</table>
 
 成績來自[技術報告 Figure 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10)。最佳配置為 **HERO + Gemini 3 Pro（0.886）**；公開 HERO notebook 使用 **Gemini 2.5 Pro（報告成績 0.821）**。
 
@@ -530,13 +821,36 @@ HERO 生成階段的輸出位置：
 
 **Attention Please · 國立政治大學**
 
-| 成員 | 技術報告所列系所 |
-| :--- | :--- |
-| Shao-Hua Wu‡ | 金融學系 |
-| Pei-Ju Hsieh‡ | 金融學系 |
-| Bo-Hao Chen‡ | 金融學系 |
-| Yi-Chen Hsiao | 財務管理學系 |
-| Yi-Yang Xue | 資訊科學系 |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="1000" align="left">成員</th>
+      <th width="1000" align="left">技術報告所列系所</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">Shao-Hua Wu‡</td>
+      <td align="left">金融學系</td>
+    </tr>
+    <tr>
+      <td align="left">Pei-Ju Hsieh‡</td>
+      <td align="left">金融學系</td>
+    </tr>
+    <tr>
+      <td align="left">Bo-Hao Chen‡</td>
+      <td align="left">金融學系</td>
+    </tr>
+    <tr>
+      <td align="left">Yi-Chen Hsiao</td>
+      <td align="left">財務管理學系</td>
+    </tr>
+    <tr>
+      <td align="left">Yi-Yang Xue</td>
+      <td align="left">資訊科學系</td>
+    </tr>
+  </tbody>
+</table>
 
 ‡ 技術報告標示共同貢獻。引用格式請見 [Citation](#citation)；相關研究與致謝收錄於技術報告。目前 repo 未提供授權檔案。
 
