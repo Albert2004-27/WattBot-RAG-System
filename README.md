@@ -267,7 +267,19 @@ Generation produces structured JSON, which is mapped to these submission fields:
 
 ## Experimental Results
 
-The experiments follow three questions: **does including tables help sparse retrieval, does HERO improve evidence retrieval, and do those improvements carry across language models?** Retrieval is evaluated on internal question sets; end-to-end WattBot Scores are reported for the 282-question competition test set.
+### Final Competition Standings
+
+<table width="100%">
+  <thead><tr><th width="800" align="left">Leaderboard</th><th width="600" align="left">Rank</th><th width="600" align="left">Score</th></tr></thead>
+  <tbody>
+    <tr><td>Public</td><td>2nd</td><td>0.886</td></tr>
+    <tr><td>Private — final standings</td><td>4th</td><td>0.840</td></tr>
+  </tbody>
+</table>
+
+Verified for **Attention Please** on October 14, 2026: [official Public leaderboard](https://www.kaggle.com/competitions/WattBot2025/leaderboard?tab=public) and [official Private leaderboard](https://www.kaggle.com/competitions/WattBot2025/leaderboard?tab=private). The competition has ended; **Private rank 4 is the final competition placement**. The Public score uses approximately 66% of test data; Private uses the other 34%. The report's 0.886 result is the Public score, not the final Private score.
+
+The experiments follow three questions: **does including tables help sparse retrieval, does HERO improve evidence retrieval, and do those improvements carry across language models?** Retrieval is evaluated on internal question sets; the model comparison reproduces report scores from the competition, whose test file contains 282 questions. Official Public and Private scores use different subsets of that test set.
 
 ### 1. The Table Paradox: Text-Only vs. Hybrid BM25
 
@@ -368,9 +380,9 @@ The report conclusion gives a different visual-chunk total; this inventory consi
   </tbody>
 </table>
 
-Source: [report Figure 5, page 10](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10). All five tested models improve with HERO.
+Source: [report Figure 5, page 10](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10). All five tested models improve with HERO in the report; this table is separate from the final Private standings above.
 
-**GPT-4o has the largest absolute gain (+0.043)**, while **Gemini 3 Pro achieves the highest final score (0.886)**. Gemini 3 Pro rises from 0.853 to 0.886, showing that retrieval improvements remain useful with a stronger answer model. Gemini 2.5 Pro rises from 0.807 to 0.821; this is the model initialized in the public HERO notebook.
+**GPT-4o has the largest absolute gain (+0.043)**, while **Gemini 3 Pro achieves the highest reported Public score (0.886)**. Gemini 3 Pro rises from 0.853 to 0.886, showing that retrieval improvements remain useful with a stronger answer model. Gemini 2.5 Pro rises from 0.807 to 0.821; this is the model initialized in the public HERO notebook.
 
 ### 5. Conclusions and Future Work
 
@@ -727,7 +739,19 @@ WattBot-RAG-System/
 
 ## 實驗成果
 
-實驗圍繞三個問題：**加入表格是否有利於 BM25、HERO 是否改善證據檢索，以及不同語言模型是否都能受益？** 檢索評估使用內部問題集，最終 WattBot Score 則來自 282 題競賽測試集的報告結果。
+### 競賽最終排名
+
+<table width="100%">
+  <thead><tr><th width="800" align="left">排行榜</th><th width="600" align="left">名次</th><th width="600" align="left">分數</th></tr></thead>
+  <tbody>
+    <tr><td>Public</td><td>第 2 名</td><td>0.886</td></tr>
+    <tr><td>Private — 最終排名</td><td>第 4 名</td><td>0.840</td></tr>
+  </tbody>
+</table>
+
+於 2026 年 10 月 14 日核對 **Attention Please** 的[官方 Public 排行榜](https://www.kaggle.com/competitions/WattBot2025/leaderboard?tab=public)與[官方 Private 排行榜](https://www.kaggle.com/competitions/WattBot2025/leaderboard?tab=private)。競賽已結束，**最終競賽名次為 Private 第 4 名**。Public 約使用 66% 測試資料，Private 使用其餘 34%。報告中的 0.886 是 Public 分數，最終 Private 分數為 0.840。
+
+實驗圍繞三個問題：**加入表格是否有利於 BM25、HERO 是否改善證據檢索，以及不同語言模型是否都能受益？** 檢索評估使用內部問題集，模型比較沿用報告中的競賽分數，測試檔案共有 282 題；官方 Public 與 Private 分數各使用其中不同子集。
 
 ### 1. 表格悖論：純文字與混合 BM25 比較
 
@@ -828,9 +852,9 @@ Docling 與 EasyOCR 將可搜尋內容從一般段落擴展至表格和圖像文
   </tbody>
 </table>
 
-來源：[報告第 10 頁 Figure 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10)。五種模型搭配 HERO 均有成績提升。
+來源：[報告第 10 頁 Figure 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10)。報告中五種模型搭配 HERO 均有成績提升；此表與上方最終 Private 排名分開呈現。
 
-**GPT-4o 的絕對提升最大（+0.043）**，**Gemini 3 Pro 的最終分數最高（0.886）**。Gemini 3 Pro 從 0.853 提升至 0.886，說明即使搭配較強的生成模型，改善證據檢索仍有幫助。Gemini 2.5 Pro 則從 0.807 提升至 0.821，也是公開 HERO notebook 初始化使用的模型。
+**GPT-4o 的絕對提升最大（+0.043）**，**Gemini 3 Pro 的報告 Public 分數最高（0.886）**。Gemini 3 Pro 從 0.853 提升至 0.886，說明即使搭配較強的生成模型，改善證據檢索仍有幫助。Gemini 2.5 Pro 則從 0.807 提升至 0.821，也是公開 HERO notebook 初始化使用的模型。
 
 ### 5. 結論與未來方向
 
