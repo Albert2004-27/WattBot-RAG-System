@@ -31,7 +31,7 @@
 - [Dataset and Evaluation](#dataset-and-evaluation)
 - [Output Format](#output-format)
 - [Experimental Results](#experimental-results)
-- [Quick Start](#quick-start)
+- [Notebook Setup](#notebook-setup)
 - [Team Members](#team-members)
 - [Citation](#citation)
 - [License](#license)
@@ -318,9 +318,9 @@ Verified for **Attention Please** on October 14, 2026: [official Public leaderbo
 
 The experiments follow three questions: **does including tables help sparse retrieval, does HERO improve evidence retrieval, and do those improvements carry across language models?** Retrieval is evaluated on internal question sets; the model comparison reproduces report scores from the competition, whose test file contains 282 questions. Official Public and Private scores use different subsets of that test set.
 
-### Which Baseline Is Being Compared?
+### Experiment Configurations
 
-The repository contains several BM25 configurations. Their labels refer to different experiments:
+The development moves from a table-noise experiment to a routed baseline, then to HERO. The configurations below distinguish these stages:
 
 <table width="100%">
   <thead><tr><th width="600" align="left">Configuration</th><th width="1400" align="left">Meaning</th></tr></thead>
@@ -331,7 +331,7 @@ The repository contains several BM25 configurations. Their labels refer to diffe
   </tbody>
 </table>
 
-These names should not be treated as interchangeable. In particular, the baseline values in report Table 16 match the Hybrid BM25 column in Table 1; the report does not establish that they measure the routed notebook implementation. The cross-model comparison follows the report's “Baseline” label, without independently confirming the exact retrieval configuration used for every run.
+The retrieval tables reproduce report Tables 1 and 16; the model comparison reproduces Figure 5. Evaluation scope and differences from the saved notebook run are collected at the end of this section.
 
 ### 1. The Table Paradox: Text-Only vs. Hybrid BM25
 
@@ -362,13 +362,13 @@ Removing raw tables raises Recall@1 by **7.69 percentage points** and MRR by **0
 
 ### 2. HERO Retrieval Performance
 
-The report compares its labeled BM25 baseline with the complete HERO pipeline using coverage, ranking quality, and first-relevant-result position. The baseline figures correspond to the 39-query Hybrid BM25 results; the final saved HERO notebook evaluation uses 41 queries. The report does not clearly specify a shared evaluation sample for Table 16.
+HERO combines structured ingestion, sparse–dense retrieval, and reranking to improve evidence selection. The following table reproduces the report’s retrieval comparison; the configurations and evaluation samples are discussed in the evaluation notes.
 
 <table width="100%">
   <thead><tr>
     <th width="500" align="left">Metric</th>
-    <th width="500" align="left">Baseline</th>
-    <th width="500" align="left">HERO</th>
+    <th width="500" align="left">Baseline (report Table 16)</th>
+    <th width="500" align="left">HERO (report Table 16)</th>
     <th width="500" align="left">Difference</th>
   </tr></thead>
   <tbody>
@@ -390,9 +390,7 @@ Source: [report Table 16, page 9](docs/WattBot2025_AttentionPlease_Technical_Rep
 - **Early evidence:** Recall@1 increases by **1.00 percentage point**, indicating more questions have a relevant reference at the first retrieved position.
 - **Ranking:** nDCG@10 increases by **0.0048**, while MRR increases by **0.0034** in the report.
 
-**HERO does not lead every BM25 configuration on every retrieval metric.** For example, Text-Only BM25 reports Recall@1 = 87.18% and MRR = 0.8974, higher than the HERO figures above, while HERO reports a slightly higher Recall@10. Because evaluation samples and ranking conventions differ, these figures do not establish a controlled winner. HERO’s demonstrated value here is broader evidence ingestion and the cross-model answer-score improvements reported below.
-
-These are results for the combined pipeline. They do not separately establish the causal contribution of OCR, fusion weights, or reranking; component-level attribution would require additional ablations.
+Text-Only BM25 has higher reported Recall@1 and MRR, while HERO has slightly higher Recall@10. These runs are not a verified same-sample comparison. The stronger evidence for HERO’s end-to-end value is the cross-model answer-score improvement shown below.
 
 ### 3. Evidence Coverage After Visual-Aware Ingestion
 
@@ -414,7 +412,7 @@ Docling and EasyOCR expand the searchable corpus beyond prose. The report's corp
 
 Source: [report Table 8, page 6](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=6). OCR contributes 437 figure-derived chunks, while 153 chunks preserve table content. Content labels allow the retrieval system to weight these sources differently from prose.
 
-The report conclusion gives a different visual-chunk total; this inventory consistently follows Table 8. Corpus counts describe evidence availability, not a measured standalone OCR accuracy gain.
+Counts follow Table 8; they describe searchable evidence, not a standalone OCR accuracy measurement.
 
 ### 4. Pipeline and Model Comparison
 
@@ -436,7 +434,7 @@ The report conclusion gives a different visual-chunk total; this inventory consi
 
 Source: [report Figure 5, page 10](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10). All five tested models improve with HERO in the report; this table is separate from the final Private standings above.
 
-**GPT-4o has the largest absolute gain (+0.043)**, while **Gemini 3 Pro achieves the highest reported Public score (0.886)**. Gemini 3 Pro rises from 0.853 to 0.886, showing that retrieval improvements remain useful with a stronger answer model. Gemini 2.5 Pro rises from 0.807 to 0.821; this is the model initialized in the public HERO notebook.
+**GPT-4o has the largest absolute gain (+0.043)**, while **Gemini 3 Pro achieves the highest score in the report (0.886, also confirmed on the Public leaderboard)**. Gemini 3 Pro rises from 0.853 to 0.886, showing that retrieval improvements remain useful with a stronger answer model. Gemini 2.5 Pro rises from 0.807 to 0.821; this is the model initialized in the public HERO notebook.
 
 ### 5. Conclusions and Future Work
 
@@ -455,56 +453,63 @@ The public HERO pipeline defaults to eight final retrieval chunks; a generation 
 
 </details>
 
-## Quick Start
+## Notebook Setup
 
-### 1. Open a Notebook
+These instructions are based on the checked-in code. **A clean-environment, end-to-end run has not been verified.** The notebooks retain experimental cells and require manual setup.
 
-Use Google Colab for the `/content/` paths used by the notebooks, or adapt the paths for local Jupyter:
+### HERO Notebook
 
-- [Baseline notebook](notebook/v1_gemini_2_5pro.ipynb)
-- [HERO notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb)
-
-### 2. Prepare the Data
-
-Upload `metadata.csv`, `train_QA.csv`, and `test_Q.csv` from `data/` to `/content/`. Check the notebook's data, PDF, and chunk paths before running cells.
-
-### 3. Install HERO Dependencies
+1. Open the [HERO notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb) in Google Colab. Upload the three CSV files from `data/` to `/content/`.
+2. The following consolidated dependency command is derived from the workflow's imports; version compatibility has not been tested. Review the notebook's existing installation cells before running it:
 
 ```python
 %pip install docling easyocr opencv-python-headless rank-bm25 sentence-transformers faiss-cpu pandas numpy requests pdfminer.six pillow tqdm google-genai
 ```
 
-The baseline additionally uses Kaggle authentication, `pdfplumber`, `pdf2image`, `pytesseract`, `fuzzywuzzy`, and `python-Levenshtein`. Its OCR cells require Poppler and Tesseract system tools.
-
-### 4. Configure Gemini
-
-Replace the notebook's manual API-key/client initialization with your preferred secret source. For an environment variable:
+3. Add the following imports **before the Docling/OCR processing cell**. The checked-in notebook uses `np` before its later import, and the generation cell uses `time` and `types` without importing them:
 
 ```python
-import os
-from google import genai
-
-client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
+import numpy as np
+import time
+from google.genai import types
 ```
 
-### 5. Run the Pipeline
+4. In the Gemini generation cell, replace the existing placeholder key and client initialization. For Colab Secrets, create a secret named `GOOGLE_API_KEY`, allow notebook access, then use:
 
-Run ingestion, indexing, retrieval, and generation in sequence. Review experimental, evaluation, and cache-cleanup cells before executing them.
+```python
+from google.colab import userdata
+from google import genai
 
-The HERO generation cell saves:
+client = genai.Client(api_key=userdata.get("GOOGLE_API_KEY"))
+```
+
+5. Execute the workflow in this order: CSV loading → PDF download → EasyOCR initialization → Docling/OCR processing → BM25/dense indexes → retrieval and reranking helpers → Gemini generator and submission. Evaluation and cache-cleanup cells are optional.
+
+The code uses these locations:
 
 ```text
+/content/metadata.csv
+/content/train_QA.csv
+/content/test_Q.csv
+/content/papers/
+/content/wattbot_working/chunks/structured_chunks_with_ocr.jsonl
 /content/submission_enhanced.csv
 ```
 
-These are research notebooks with manual configuration, not a packaged command-line application. Dependencies are not pinned; model/API availability and source-document downloads may affect reproduction.
+Check download failures and the OCR chunk count before generating answers. OCR extraction also depends on the Docling version and image representation; the import additions alone do not establish full compatibility. Model downloads, API access, and source-document availability are required.
+
+### Baseline Notebook
+
+The [baseline notebook](notebook/v1_gemini_2_5pro.ipynb) uses `kagglehub.login()` and a competition download, then later hard-codes `/root/.cache/kagglehub/competitions/WattBot2025`. Reconcile those paths with the actual download location before running the experiments. The HERO upload instructions do not directly configure this notebook.
+
+Its setup includes PyMuPDF, pdfplumber, pdf2image, pytesseract, fuzzywuzzy, and python-Levenshtein; OCR installation cells use Poppler and Tesseract through `apt-get`. Its Gemini setup reads `GEMINI_API_KEY`, so configure that variable separately. Select the intended retrieval/generation experiment rather than assuming every cell is one continuous production pipeline.
 
 ## Team Members
 
 **Team Attention Please**
 
 - **Shao-Hua Wu**‡ - Document Processing & Retrieval System & Project Lead
-- **Xie-Pei Ju**‡ - Document Processing & Retrieval System & Hybrid Search Implementation & Answer Generation & Prompt Engineering & Optimization
+- **Pei-Ju Hsieh**‡ - Document Processing & Retrieval System & Hybrid Search Implementation & Answer Generation & Prompt Engineering & Optimization
 - **Bo-Hao Chen**‡ - Answer Generation & Prompt Engineering & Optimization
 - **Yi-Chen Hsiao**∗ - Report Generation
 - **Yi-Yang Xue**† - Retrieval System & Hybrid Search Implementation
@@ -556,7 +561,7 @@ See the [technical report](docs/WattBot2025_AttentionPlease_Technical_Report.pdf
 - [資料集與評分方式](#資料集與評分方式)
 - [輸出格式](#輸出格式)
 - [實驗成果](#實驗成果)
-- [快速啟動](#快速啟動)
+- [Notebook 執行設定](#notebook-執行設定)
 - [團隊成員](#團隊成員)
 - [引用格式](#引用格式)
 - [授權](#授權)
@@ -842,9 +847,9 @@ WattBot-RAG-System/
 
 實驗圍繞三個問題：**加入表格是否有利於 BM25、HERO 是否改善證據檢索，以及不同語言模型是否都能受益？** 檢索評估使用內部問題集，模型比較沿用報告中的競賽分數，測試檔案共有 282 題；官方 Public 與 Private 分數各使用其中不同子集。
 
-### 實驗中的 Baseline 指哪個版本？
+### 實驗配置
 
-Repo 保留多種 BM25 配置，以下名稱對應不同實驗：
+本專案從表格雜訊實驗出發，發展路由式 Baseline，再加入 HERO 的混合檢索。以下配置對應這些階段：
 
 <table width="100%">
   <thead><tr><th width="600" align="left">配置</th><th width="1400" align="left">定義</th></tr></thead>
@@ -855,7 +860,7 @@ Repo 保留多種 BM25 配置，以下名稱對應不同實驗：
   </tbody>
 </table>
 
-這三個名稱不能互換。報告 Table 16 的 Baseline 數值與 Table 1 的 Hybrid BM25 欄相同，但報告未證實這組數值就是路由式 notebook 實作的評估結果。跨模型比較則沿用報告的「Baseline」標籤，尚未逐一確認各次實驗的精確檢索配置。
+檢索表格依報告 Table 1、Table 16 列示，模型比較依 Figure 5 列示。評估範圍與 notebook 留存輸出的差異集中說明於本節末尾。
 
 ### 1. 表格悖論：純文字與混合 BM25 比較
 
@@ -886,13 +891,13 @@ Baseline 比較「文字加原始 Markdown 表格」與「純文字」兩種語�
 
 ### 2. HERO 檢索品質
 
-報告以覆蓋率、排序品質與第一個相關結果的位置，比較其標示的 BM25 Baseline 與完整 HERO pipeline。Baseline 數值對應 39 題的 Hybrid BM25 結果；HERO 最後留存的 notebook 評估使用 41 題。報告未清楚交代 Table 16 是否使用共同評估樣本。
+HERO 透過結構化擷取、稀疏與稠密檢索及重排序改善證據選擇。下表呈現報告中的檢索比較，配置與評估樣本差異集中列於評估說明。
 
 <table width="100%">
   <thead><tr>
     <th width="500" align="left">指標</th>
-    <th width="500" align="left">Baseline</th>
-    <th width="500" align="left">HERO</th>
+    <th width="500" align="left">Baseline（報告 Table 16）</th>
+    <th width="500" align="left">HERO（報告 Table 16）</th>
     <th width="500" align="left">差異</th>
   </tr></thead>
   <tbody>
@@ -914,9 +919,7 @@ Baseline 比較「文字加原始 Markdown 表格」與「純文字」兩種語�
 - **首位命中**：Recall@1 增加 **1.00 個百分點**，代表更多問題能在第一個檢索位置找到相關引用。
 - **排序品質**：報告中的 nDCG@10 增加 **0.0048**，MRR 增加 **0.0034**。
 
-**HERO 並非在所有檢索指標上都勝過每種 BM25 配置。** 例如 Text-Only BM25 的 Recall@1 為 87.18%、MRR 為 0.8974，高於上表 HERO 數值；HERO 的 Recall@10 則略高。由於評估樣本與排名計算方式不同，不能據此判定控制實驗中的優勝者。此處 HERO 的價值在於擴充證據來源，以及下方報告記錄的跨模型答案分數提升。
-
-這些是完整 pipeline 的結果，不能單獨證明 OCR、融合權重或重排序各自造成多少提升；若要分離元件貢獻，仍需要額外消融實驗。
+Text-Only BM25 的報告 Recall@1 與 MRR 較高，HERO 的 Recall@10 則略高；這些結果並非已驗證的同樣本比較。下方跨模型答案分數的提升，更直接呈現 HERO 在完整問答流程中的價值。
 
 ### 3. 視覺證據擷取後的語料組成
 
@@ -938,7 +941,7 @@ Docling 與 EasyOCR 將可搜尋內容從一般段落擴展至表格和圖像文
 
 來源：[報告第 6 頁 Table 8](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=6)。其中 437 個區塊來自圖像 OCR，153 個區塊保留表格內容。類型標籤讓檢索階段能為不同證據來源配置權重。
 
-報告結論另列不同的視覺區塊總數；此處統一採用 Table 8。區塊數反映可用證據規模，並不等於已量測的 OCR 獨立準確率提升。
+數量統一採用 Table 8，反映可搜尋證據規模，不代表 OCR 的獨立準確率。
 
 ### 4. 不同模型與 Pipeline 比較
 
@@ -960,7 +963,7 @@ Docling 與 EasyOCR 將可搜尋內容從一般段落擴展至表格和圖像文
 
 來源：[報告第 10 頁 Figure 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10)。報告中五種模型搭配 HERO 均有成績提升；此表與上方最終 Private 排名分開呈現。
 
-**GPT-4o 的絕對提升最大（+0.043）**，**Gemini 3 Pro 的報告 Public 分數最高（0.886）**。Gemini 3 Pro 從 0.853 提升至 0.886，說明即使搭配較強的生成模型，改善證據檢索仍有幫助。Gemini 2.5 Pro 則從 0.807 提升至 0.821，也是公開 HERO notebook 初始化使用的模型。
+**GPT-4o 的絕對提升最大（+0.043）**，**Gemini 3 Pro 的報告分數最高（0.886，亦已由 Public 榜單確認）**。Gemini 3 Pro 從 0.853 提升至 0.886，說明即使搭配較強的生成模型，改善證據檢索仍有幫助。Gemini 2.5 Pro 則從 0.807 提升至 0.821，也是公開 HERO notebook 初始化使用的模型。
 
 ### 5. 結論與未來方向
 
@@ -979,56 +982,63 @@ Notebook 的 Recall@K 判斷前 K 個結果是否命中任一標準引用，實�
 
 </details>
 
-## 快速啟動
+## Notebook 執行設定
 
-### 1. 開啟 Notebook
+以下依公開程式整理，**尚未從乾淨環境驗證完整執行成功**。Notebook 保留實驗 cell，需要手動設定。
 
-建議使用 Google Colab，配合 notebook 的 `/content/` 路徑；使用本機 Jupyter 時請先調整路徑。
+### HERO Notebook
 
-- [Baseline notebook](notebook/v1_gemini_2_5pro.ipynb)
-- [HERO notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb)
-
-### 2. 準備資料
-
-將 `data/` 中的 `metadata.csv`、`train_QA.csv`、`test_Q.csv` 上傳至 `/content/`，確認資料、PDF 與區塊輸出路徑。
-
-### 3. 安裝 HERO 套件
+1. 在 Google Colab 開啟 [HERO notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb)，將 `data/` 的三份 CSV 上傳到 `/content/`。
+2. 下列套件清單依流程使用的匯入整理，尚未驗證版本相容性；請先檢查 notebook 已有的安裝 cell：
 
 ```python
 %pip install docling easyocr opencv-python-headless rank-bm25 sentence-transformers faiss-cpu pandas numpy requests pdfminer.six pillow tqdm google-genai
 ```
 
-Baseline 另外使用 Kaggle 登入、`pdfplumber`、`pdf2image`、`pytesseract`、`fuzzywuzzy` 與 `python-Levenshtein`；OCR cell 需要 Poppler 與 Tesseract 系統工具。
-
-### 4. 設定 Gemini
-
-將 notebook 手動設定 API key 與 client 的部分改為你的秘密管理方式。例如從環境變數讀取：
+3. 在 **Docling／OCR 處理 cell 之前**補上以下匯入。公開版本在較晚才匯入 `np`，生成階段則使用未匯入的 `time` 與 `types`：
 
 ```python
-import os
-from google import genai
-
-client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
+import numpy as np
+import time
+from google.genai import types
 ```
 
-### 5. 執行流程
+4. 在 Gemini 生成 cell 中，替換原本的佔位金鑰與 client 初始化。若使用 Colab Secrets，建立 `GOOGLE_API_KEY` 並允許 notebook 存取，再使用：
 
-依序執行文件處理、索引、檢索與生成。探索性實驗、評估與清除快取 cell 請先檢查再執行。
+```python
+from google.colab import userdata
+from google import genai
 
-HERO 生成階段的輸出位置：
+client = genai.Client(api_key=userdata.get("GOOGLE_API_KEY"))
+```
+
+5. 依序執行：CSV 載入 → PDF 下載 → EasyOCR 初始化 → Docling／OCR 處理 → BM25／向量索引 → 檢索與重排序函式 → Gemini 生成與匯出。評估與清除快取 cell 為選用步驟。
+
+程式使用的路徑如下：
 
 ```text
+/content/metadata.csv
+/content/train_QA.csv
+/content/test_Q.csv
+/content/papers/
+/content/wattbot_working/chunks/structured_chunks_with_ocr.jsonl
 /content/submission_enhanced.csv
 ```
 
-目前為需要手動設定的研究 notebook。套件未固定版本，模型／API 可用性與原始文獻下載狀態可能影響重現。
+生成答案前，請檢查文件下載失敗清單與 OCR 區塊數。OCR 也受 Docling 版本與圖像物件格式影響，補上匯入不代表已解決所有相容性問題。流程需要下載模型、可用的 API 存取與原始文獻。
+
+### Baseline Notebook
+
+[Baseline notebook](notebook/v1_gemini_2_5pro.ipynb) 使用 `kagglehub.login()` 與競賽下載，後續又寫死 `/root/.cache/kagglehub/competitions/WattBot2025`。執行前需將路徑統一到實際下載位置；HERO 的上傳步驟不會直接設定此版本。
+
+其設定包含 PyMuPDF、pdfplumber、pdf2image、pytesseract、fuzzywuzzy 與 python-Levenshtein；OCR 安裝 cell 透過 `apt-get` 安裝 Poppler 與 Tesseract。Gemini 設定讀取 `GEMINI_API_KEY`，需另外設定。請選擇要重現的檢索／生成實驗，不宜直接假設所有 cell 構成單一正式流程。
 
 ## 團隊成員
 
 **Team Attention Please**
 
 - **Shao-Hua Wu**‡ - 文件處理、檢索系統、專案統籌
-- **Xie-Pei Ju**‡ - 文件處理、檢索系統、混合搜尋實作、答案生成、提示詞設計與優化
+- **Pei-Ju Hsieh**‡ - 文件處理、檢索系統、混合搜尋實作、答案生成、提示詞設計與優化
 - **Bo-Hao Chen**‡ - 答案生成、提示詞設計與優化
 - **Yi-Chen Hsiao**∗ - 報告製作
 - **Yi-Yang Xue**† - 檢索系統、混合搜尋實作
