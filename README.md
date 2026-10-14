@@ -32,6 +32,8 @@
 - [Quick Start](#quick-start)
 - [Team Members](#team-members)
 - [Citation](#citation)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 - [中文版說明](#中文版說明)
 
 ## Introduction
@@ -436,37 +438,17 @@ These are research notebooks with manual configuration, not a packaged command-l
 **Attention Please · National Chengchi University**
 
 <table width="100%">
-  <thead>
-    <tr>
-      <th width="1000" align="left">Member</th>
-      <th width="1000" align="left">Affiliation in the technical report</th>
-    </tr>
-  </thead>
+  <thead><tr><th width="400" align="left">Member</th><th width="400" align="left">Department</th><th width="1200" align="left">Contributions</th></tr></thead>
   <tbody>
-    <tr>
-      <td align="left">Shao-Hua Wu‡</td>
-      <td align="left">Department of Money and Banking</td>
-    </tr>
-    <tr>
-      <td align="left">Pei-Ju Hsieh‡</td>
-      <td align="left">Department of Money and Banking</td>
-    </tr>
-    <tr>
-      <td align="left">Bo-Hao Chen‡</td>
-      <td align="left">Department of Money and Banking</td>
-    </tr>
-    <tr>
-      <td align="left">Yi-Chen Hsiao</td>
-      <td align="left">Department of Finance</td>
-    </tr>
-    <tr>
-      <td align="left">Yi-Yang Xue</td>
-      <td align="left">Department of Computer Science</td>
-    </tr>
+    <tr><td>Shao-Hua Wu‡</td><td>Money and Banking</td><td>Document processing, retrieval system, project lead</td></tr>
+    <tr><td>Pei-Ju Hsieh‡</td><td>Money and Banking</td><td>Document processing, retrieval system, hybrid search implementation, answer generation, prompt engineering and optimization</td></tr>
+    <tr><td>Bo-Hao Chen‡</td><td>Money and Banking</td><td>Answer generation, prompt engineering and optimization</td></tr>
+    <tr><td>Yi-Chen Hsiao</td><td>Finance</td><td>Report preparation</td></tr>
+    <tr><td>Yi-Yang Xue</td><td>Computer Science</td><td>Retrieval system, hybrid search implementation</td></tr>
   </tbody>
 </table>
 
-‡ Equal contribution, as marked in the technical report.
+‡ Equal contribution. Names and affiliations follow the technical report; roles follow the original README.
 
 ## Citation
 
@@ -479,7 +461,17 @@ These are research notebooks with manual configuration, not a packaged command-l
 }
 ```
 
-Related work and acknowledgments are included in the technical report. The repository currently does not include a license file.
+## License
+
+No `LICENSE` file is currently included in this repository. Licensing terms have not been specified in the repository.
+
+## Acknowledgments
+
+- The WattBot competition organizers at ML+X, University of Wisconsin–Madison.
+- Google for Gemini API access.
+- The open-source community for the tools and libraries supporting this project.
+
+See the [technical report](docs/WattBot2025_AttentionPlease_Technical_Report.pdf) for related work, including the KohakuRAG case study that informed the team's approach.
 
 ---
 
@@ -504,7 +496,10 @@ Related work and acknowledgments are included in the technical report. The repos
 - [輸出格式](#輸出格式)
 - [實驗成果](#實驗成果)
 - [快速啟動](#快速啟動)
-- [團隊成員與引用](#團隊成員與引用)
+- [團隊成員](#團隊成員)
+- [引用格式](#引用格式)
+- [授權](#授權)
+- [致謝](#致謝)
 
 ## 專案介紹
 
@@ -903,41 +898,46 @@ HERO 生成階段的輸出位置：
 
 目前為需要手動設定的研究 notebook。套件未固定版本，模型／API 可用性與原始文獻下載狀態可能影響重現。
 
-## 團隊成員與引用
+## 團隊成員
 
 **Attention Please · 國立政治大學**
 
 <table width="100%">
-  <thead>
-    <tr>
-      <th width="1000" align="left">成員</th>
-      <th width="1000" align="left">技術報告所列系所</th>
-    </tr>
-  </thead>
+  <thead><tr><th width="400" align="left">成員</th><th width="400" align="left">系所</th><th width="1200" align="left">主要貢獻</th></tr></thead>
   <tbody>
-    <tr>
-      <td align="left">Shao-Hua Wu‡</td>
-      <td align="left">金融學系</td>
-    </tr>
-    <tr>
-      <td align="left">Pei-Ju Hsieh‡</td>
-      <td align="left">金融學系</td>
-    </tr>
-    <tr>
-      <td align="left">Bo-Hao Chen‡</td>
-      <td align="left">金融學系</td>
-    </tr>
-    <tr>
-      <td align="left">Yi-Chen Hsiao</td>
-      <td align="left">財務管理學系</td>
-    </tr>
-    <tr>
-      <td align="left">Yi-Yang Xue</td>
-      <td align="left">資訊科學系</td>
-    </tr>
+    <tr><td>Shao-Hua Wu‡</td><td>金融學系</td><td>文件處理、檢索系統、專案統籌</td></tr>
+    <tr><td>Pei-Ju Hsieh‡</td><td>金融學系</td><td>文件處理、檢索系統、混合搜尋實作、答案生成、提示詞設計與優化</td></tr>
+    <tr><td>Bo-Hao Chen‡</td><td>金融學系</td><td>答案生成、提示詞設計與優化</td></tr>
+    <tr><td>Yi-Chen Hsiao</td><td>財務管理學系</td><td>報告製作</td></tr>
+    <tr><td>Yi-Yang Xue</td><td>資訊科學系</td><td>檢索系統、混合搜尋實作</td></tr>
   </tbody>
 </table>
 
-‡ 技術報告標示共同貢獻。引用格式請見 [Citation](#citation)；相關研究與致謝收錄於技術報告。目前 repo 未提供授權檔案。
+‡ 共同貢獻。姓名與系所依技術報告列示，工作分工沿用原版 README。
+
+## 引用格式
+
+若本專案對你的研究或實作有幫助，歡迎使用以下格式引用：
+
+```bibtex
+@misc{wattbot2025_hero,
+  title = {WattBot 2025: Retrieval-Augmented Generation for ESG Intelligence},
+  author = {Wu, Shao-Hua and Hsieh, Pei-Ju and Chen, Bo-Hao and Hsiao, Yi-Chen and Xue, Yi-Yang},
+  year = {2025},
+  url = {https://github.com/AnnieHsieh-12/WattBot-RAG-System}
+}
+```
+
+## 授權
+
+目前 repo 未包含 `LICENSE` 檔案，尚未在 repository 中明定授權條款。
+
+## 致謝
+
+- WattBot 競賽主辦單位：威斯康辛大學麥迪遜分校 ML+X。
+- Google 提供 Gemini API 存取。
+- 提供本專案所使用工具與函式庫的開源社群。
+
+相關研究與啟發團隊設計的 KohakuRAG 案例，可參閱[技術報告](docs/WattBot2025_AttentionPlease_Technical_Report.pdf)。
 
 [回到英文版](#table-of-contents) · [回到中文目錄](#中文目錄)
