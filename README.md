@@ -500,9 +500,14 @@ Check download failures and the OCR chunk count before generating answers. OCR e
 
 ### Baseline Notebook
 
-The [baseline notebook](notebook/v1_gemini_2_5pro.ipynb) uses `kagglehub.login()` and a competition download, then later hard-codes `/root/.cache/kagglehub/competitions/WattBot2025`. Reconcile those paths with the actual download location before running the experiments. The HERO upload instructions do not directly configure this notebook.
+The [baseline notebook](notebook/v1_gemini_2_5pro.ipynb) contains several experiments. To prepare its data and run the Gemini answer-generation section:
 
-Its setup includes PyMuPDF, pdfplumber, pdf2image, pytesseract, fuzzywuzzy, and python-Levenshtein; OCR installation cells use Poppler and Tesseract through `apt-get`. Its Gemini setup reads `GEMINI_API_KEY`, so configure that variable separately. Select the intended retrieval/generation experiment rather than assuming every cell is one continuous production pipeline.
+1. Open the notebook in Google Colab. Run its Kaggle login, dependency-installation, and competition-download cells. You need access to the WattBot 2025 competition data. The download cell prints `Downloaded to: ...`; keep that path.
+2. Replace the hard-coded `/root/.cache/kagglehub/competitions/WattBot2025` path in later cells with the path printed in step 1. In particular, update `INPUT_DIR` in the data-loading cell and in `main()` at the end. The PDF parsing test also sets `data_dir` to that hard-coded path.
+3. Run the document-processing cells needed to create `/content/hybrid_chunks.json`. The final generation cell reads that file, plus `metadata.csv` and `test_Q.csv` from `INPUT_DIR`. Check that all three exist before running it.
+4. Before the final generation cell, make sure `google-genai` is installed; the notebook imports it but has no installation cell for it. Replace the placeholder `GEMINI_API_KEY = "# ⚠️ 請替換成你的 API Key"` with a valid key, then run the cell to generate a submission CSV. It calls `main()` automatically and sends the test questions to the Gemini API. Keep your key out of any notebook you share.
+
+The notebook also includes separate PDF parsing and retrieval tests. Those cells are experiments rather than additional steps in the final generation function. The dependency cells install Python packages and, for OCR, Poppler and Tesseract through `apt-get`. This setup is based on reading the notebook; a clean end-to-end run has not been verified.
 
 ## Team Members
 
@@ -1029,9 +1034,14 @@ client = genai.Client(api_key=userdata.get("GOOGLE_API_KEY"))
 
 ### Baseline Notebook
 
-[Baseline notebook](notebook/v1_gemini_2_5pro.ipynb) 使用 `kagglehub.login()` 與競賽下載，後續又寫死 `/root/.cache/kagglehub/competitions/WattBot2025`。執行前需將路徑統一到實際下載位置；HERO 的上傳步驟不會直接設定此版本。
+[Baseline notebook](notebook/v1_gemini_2_5pro.ipynb) 收錄了多組實驗。若要準備資料並執行其中的 Gemini 答案生成程式，請依序檢查：
 
-其設定包含 PyMuPDF、pdfplumber、pdf2image、pytesseract、fuzzywuzzy 與 python-Levenshtein；OCR 安裝 cell 透過 `apt-get` 安裝 Poppler 與 Tesseract。Gemini 設定讀取 `GEMINI_API_KEY`，需另外設定。請選擇要重現的檢索／生成實驗，不宜直接假設所有 cell 構成單一正式流程。
+1. 在 Google Colab 開啟 notebook，執行 Kaggle 登入、安裝套件與下載競賽資料的程式格。你需要有 WattBot 2025 競賽資料的存取權。下載時會印出 `Downloaded to: ...`，請記下這個資料夾位置。
+2. 後面的程式有幾處把資料夾寫死為 `/root/.cache/kagglehub/competitions/WattBot2025`。請改成第 1 步印出的實際位置，尤其是讀取資料的 `INPUT_DIR`，以及最後 `main()` 裡的 `INPUT_DIR`。PDF 解析測試的 `data_dir` 也使用同一個寫死的路徑。
+3. 執行產生 `/content/hybrid_chunks.json` 所需的文件處理程式格。最後的答案生成程式會讀取這個檔案，以及 `INPUT_DIR` 中的 `metadata.csv` 和 `test_Q.csv`；執行前先確認三個檔案都存在。
+4. 執行最後的答案生成程式格之前，先確認已安裝 `google-genai`；notebook 會匯入它，但沒有對應的安裝程式格。將 `GEMINI_API_KEY = "# ⚠️ 請替換成你的 API Key"` 這行的佔位文字換成有效金鑰，再執行該格產生提交用 CSV。這格會自動呼叫 `main()`，並將測試題送到 Gemini API。分享 notebook 前，請移除金鑰。
+
+Notebook 另有 PDF 解析與檢索測試；它們是獨立實驗，不是最後答案生成函式的額外步驟。安裝程式格會安裝 Python 套件，OCR 所需的 Poppler 與 Tesseract 則透過 `apt-get` 安裝。以上步驟依公開程式整理，尚未從乾淨環境完整驗證。
 
 ## 團隊成員
 
