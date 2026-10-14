@@ -1,160 +1,230 @@
-<div align="center">
+# WattBot 2025 — Retrieval-Augmented Generation for ESG Intelligence
 
-# WattBot · HERO
+## HERO · Hybrid Evidence Retrieval Optimization
 
-### Hybrid Evidence Retrieval Optimization
+A retrieval-augmented generation system for extracting verifiable information about AI energy consumption, carbon emissions, and water use from academic papers and industry reports.
 
-**Evidence-grounded answers about the environmental impact of AI.**<br>
-**從文字、表格與圖像中，找出 AI 環境影響的可追溯證據。**
+Developed by **Team Attention Please** for WattBot 2025 and the Natural Language Processing term project at National Chengchi University.
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
-![Notebooks](https://img.shields.io/badge/Jupyter-Research_Notebooks-F37626?style=flat-square&logo=jupyter&logoColor=white)
-![Retrieval](https://img.shields.io/badge/Retrieval-BM25_%2B_Dense-0F766E?style=flat-square)
-![Team](https://img.shields.io/badge/Team-Attention_Please-334155?style=flat-square)
+[Technical Report](docs/WattBot2025_AttentionPlease_Technical_Report.pdf) · [Presentation](docs/WattBot2025_AttentionPlease_Presentation.pdf) · [Baseline Notebook](notebook/v1_gemini_2_5pro.ipynb) · [HERO Notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb) · [中文版說明](#中文版說明)
 
-[English](#english) · [繁體中文](#traditional-chinese)<br>
-[Technical Report](docs/WattBot2025_AttentionPlease_Technical_Report.pdf) · [Presentation](docs/WattBot2025_AttentionPlease_Presentation.pdf) · [Baseline Notebook](notebook/v1_gemini_2_5pro.ipynb) · [HERO Notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb)
+## Table of Contents
 
-</div>
+- [Introduction](#introduction)
+- [Technology Stack](#technology-stack)
+- [System Architecture](#system-architecture)
+  - [Baseline: BM25 Retrieval](#baseline-bm25-retrieval)
+  - [HERO: Visual-Aware Hybrid Retrieval](#hero-visual-aware-hybrid-retrieval)
+  - [Architecture Comparison](#architecture-comparison)
+- [Project Structure](#project-structure)
+- [System Workflow](#system-workflow)
+- [Dataset and Evaluation](#dataset-and-evaluation)
+- [Experimental Results](#experimental-results)
+- [Quick Start](#quick-start)
+- [Team Members](#team-members)
+- [Citation](#citation)
+- [中文版說明](#中文版說明)
 
-> **Reported best WattBot Score: 0.886 — HERO + Gemini 3 Pro.**<br>
-> The public HERO notebook uses Gemini 2.5 Pro; the report records 0.821 for that configuration.<br>
-> **報告最佳成績為 0.886（HERO + Gemini 3 Pro）；公開 HERO notebook 使用 Gemini 2.5 Pro，報告對應成績為 0.821。**
+## Introduction
 
-<a id="english"></a>
+WattBot asks a practical question: **can a system find the evidence behind an AI sustainability claim?** Answers often depend on a single value inside a table or figure, expressed in units that differ from the question.
 
-## English
+Our system retrieves the relevant evidence and returns a normalized answer with document citations and supporting text. It also handles questions that cannot be answered from the available documents.
 
-[Overview](#en-overview) · [Results](#en-results) · [Baseline](#en-baseline) · [HERO](#en-hero) · [Comparison](#en-comparison) · [Data & Files](#en-data) · [Getting Started](#en-setup) · [Notes](#en-notes) · [Team & Citation](#en-team)
+The project develops two approaches:
 
-<a id="en-overview"></a>
+- **BM25 Baseline** — text and table retrieval with query routing and two-stage answer generation.
+- **HERO** — layout-aware parsing and OCR, sparse–dense retrieval, weighted rank fusion, CrossEncoder reranking, and question-specific generation.
 
-### Overview
+The key finding is the **table paradox**: adding raw tables can introduce noise into keyword retrieval, while removing them discards important numerical evidence. HERO addresses this by preserving content types and giving table and OCR evidence explicit weights during retrieval.
 
-Developed by **Team Attention Please** for the WattBot 2025 challenge and an NLP term project, HERO retrieves evidence from academic papers and industry reports to answer questions about AI energy consumption, emissions, water use, and sustainability.
+## Technology Stack
 
-The task goes beyond producing fluent text: answers must contain normalized values and units, document references, and supporting evidence. When evidence is insufficient, the system must explicitly abstain.
+```text
+Language:          Python
+Environment:       Jupyter Notebook / Google Colab
+Baseline Parsing:  PyMuPDF + pdfplumber
+HERO Parsing:      Docling + EasyOCR + OpenCV
+Sparse Retrieval:  BM25 (rank-bm25)
+Dense Retrieval:   Sentence-Transformers + BGE-large + FAISS
+Reranking:         BGE-reranker-v2-m3
+Answer Generation: Google Gemini API
+Data Processing:   pandas + NumPy
+```
 
-**The central challenge — the table paradox.** Tables contain valuable numerical evidence, but their formatting can interfere with sparse retrieval. Removing tables reduces noise while discarding useful information. Our progression from a BM25 baseline to HERO addresses this tension through layout-aware parsing, OCR, hybrid retrieval, and content-aware weighting.
+The stack above follows the public notebooks. The technical report describes additional experimental configurations.
 
-<a id="en-results"></a>
+## System Architecture
 
-### Reported Results
+### Baseline: BM25 Retrieval
 
-| Model | Baseline | HERO | Gain |
-| :--- | ---: | ---: | ---: |
-| GPT-4o-mini | 0.753 | 0.789 | +0.036 |
-| GPT-4o | 0.768 | 0.811 | +0.043 |
-| GPT-5.1 | 0.778 | 0.807 | +0.029 |
-| Gemini 2.5 Pro | 0.807 | 0.821 | +0.014 |
-| **Gemini 3 Pro** | **0.853** | **0.886** | **+0.033** |
+![Baseline BM25 architecture](docs/images/baseline-architecture.png)
 
-Source: [technical report, Figure 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf) and [presentation, slide 24](docs/WattBot2025_AttentionPlease_Presentation.pdf). These are reported competition scores, not new measurements from this documentation update. The presentation states “Top 1”; the repository does not provide separate evidence establishing both public and private first-place rankings.
+*Figure 2 from the [technical report, page 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=5).*
 
-The WattBot Score weights **answer value (75%)**, **reference IDs (15%)**, and **unanswerable handling (10%)**. The report describes ±0.1% relative tolerance for numeric answers and Jaccard overlap for citation sets.
+The baseline separates document processing from question answering:
 
-<a id="en-baseline"></a>
+1. **Document extraction.** Parse PDFs and prepare text and table chunks.
+2. **Sparse indexing.** Build BM25 indexes for lexical matching.
+3. **Query routing.** Identify table-related questions using keywords. The notebook's `hybrid_search` combines **Top-7 text + Top-3 table** results for these questions, applying a **0.8× table-score weight**. Other questions use text retrieval.
+4. **Answer generation.** First answer from a small evidence set; if unsuccessful, expand the context and try again.
+5. **Structured output.** Return the answer, value, unit, references, supporting evidence, and explanation.
 
-### Baseline Architecture — Dual BM25 Retrieval
+The report diagram presents text-only and hybrid indexes; the notebook routing implementation separates text and table indexes. Here, “hybrid” refers to content types. This baseline routing path does not combine BM25 with dense retrieval.
 
-[Explore the Baseline notebook](notebook/v1_gemini_2_5pro.ipynb)
+### HERO: Visual-Aware Hybrid Retrieval
 
-![Baseline BM25 architecture from technical report Figure 2](docs/images/baseline-architecture.png)
+![HERO architecture](docs/images/hero-architecture.png)
 
-*Source: [technical report, Figure 2 (page 5)](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=5). The report illustrates text-only and hybrid BM25 indexes; the notebook routing implementation described below uses separate text and table indexes.*
+*Figure 4 from the [technical report, page 7](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=7).*
 
-1. **Extract and prepare evidence.** PDF parsing and chunking produce text and table content. The notebook contains several experiments; the walkthrough below highlights its `hybrid_search` text/table routing implementation.
-2. **Build two sparse indexes.** Separate BM25 indexes support text and table search. Here, “hybrid” refers to combining content types, rather than combining sparse and dense retrieval.
-3. **Route the question.** Ordinary queries retrieve text chunks. Table-related queries combine seven text chunks with three table chunks, multiplying table scores by **0.8** before sorting.
-4. **Generate in two stages.** The generation design first uses a small context, then expands context if the initial answer is unavailable. Outputs include values, units, evidence, and citations.
+HERO extends the baseline in five stages:
 
-**Why move beyond it?** Exact keyword matching struggles with synonyms, noisy table representations, and evidence inside figures. The baseline notebook also includes alternative retrieval and generation paths; it is an experimental record rather than one packaged executable pipeline.
+1. **Visual-aware ingestion.** Docling extracts document elements; EasyOCR and OpenCV turn text inside figures into searchable evidence. Chunks retain their content type and document ID.
+2. **Dual retrieval.** BM25 handles exact terms and numbers, while dense embeddings retrieve semantically related passages.
+3. **Weighted reciprocal rank fusion.** Combine sparse and dense rankings, boosting **tables ×2.0**, **OCR ×1.8**, and **author/year matches ×2.0**.
+4. **CrossEncoder reranking.** Jointly score each query–chunk pair to prioritize relevant evidence.
+5. **Adaptive generation.** Choose prompts by question type, answer from Top-3 context first, and expand the supplied context when a second attempt is needed.
 
-<a id="en-hero"></a>
+The original report figure labels the embedding model as **BGE-M3**. The public notebook uses **BGE-large-en-v1.5**, normalized embeddings with FAISS `IndexFlatIP`, and **BGE-reranker-v2-m3**. It includes MiniLM fallbacks for model-loading failures.
 
-### HERO Architecture — Visual-Aware Hybrid Retrieval
+### Architecture Comparison
 
-[Explore the HERO notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb)
-
-![HERO architecture from technical report Figure 4](docs/images/hero-architecture.png)
-
-*Source: [technical report, Figure 4 (page 7)](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=7). The original figure shows the report configuration (BGE-M3); the public notebook uses BGE-large and the settings documented below.*
-
-| Step | Implementation | Purpose |
+| Component | BM25 Baseline | HERO |
 | :--- | :--- | :--- |
-| Ingestion | Docling + EasyOCR + OpenCV | Extract layout-aware text, tables, and text from figures |
-| Sparse retrieval | BM25 + enhanced tokenization | Match technical terms, numbers, and years |
-| Dense retrieval | `BAAI/bge-large-en-v1.5` + FAISS `IndexFlatIP` | Retrieve semantically related evidence using normalized embeddings |
-| Query enhancement | Unit expansion + author/year hints | Connect abbreviated units with domain vocabulary |
-| Fusion | Weighted reciprocal rank fusion | Combine rankings; boost tables, OCR, and metadata matches |
-| Reranking | `BAAI/bge-reranker-v2-m3` | Score query–chunk pairs jointly |
-| Generation | Gemini 2.5 Pro + question-type prompts | Produce structured answers with adaptive context |
-| Export | pandas → CSV | Assemble answers, references, evidence, and explanations |
+| Document parsing | PyMuPDF / pdfplumber | Docling + EasyOCR |
+| Evidence sources | Text and tables | Text, tables, and figure OCR |
+| Retrieval | Text/table BM25 indexes | BM25 + dense vector search |
+| Table handling | BM25 score weight ×0.8 | RRF weight ×2.0 |
+| Ranking | Weighted BM25 scores | Weighted RRF + CrossEncoder |
+| Query adaptation | Table-related routing | Unit expansion and metadata hints |
+| Generation | Two-stage fallback | Type-specific prompts and two-stage fallback |
 
-**How evidence flows.** Offline processing turns PDFs into typed chunks and builds sparse and dense indexes. Online retrieval searches both indexes, fuses their rankings, and reranks candidates before generation. The generator uses question-specific instructions for tables, model-specific values, scores, terms, and numeric extraction.
-
-**Weighting matters.** RRF operates on ranks rather than directly mixing incompatible BM25 and vector scores. Table chunks receive **2.0×**, image OCR chunks **1.8×**, and metadata matches **2.0×** weighting. Metadata weighting can compound with content-type weighting.
-
-**Context is bounded by retrieval.** `adaptive_search_final` defaults to 100 fused candidates and eight final chunks. Generation requests up to seven or ten chunks in its fallback stage, but can only use the chunks actually supplied. The query-based reranking helper currently enables reranking for all queries.
-
-**Model fallbacks.** If BGE-large fails to load, the notebook attempts `all-MiniLM-L6-v2`; the reranker similarly falls back to `ms-marco-MiniLM-L-12-v2`.
-
-<a id="en-comparison"></a>
-
-### Baseline vs. HERO
-
-| Aspect | Baseline routing path | HERO public notebook |
-| :--- | :--- | :--- |
-| PDF processing | PyMuPDF / pdfplumber experiments | Docling + EasyOCR |
-| Evidence | Text and tables | Text, tables, and figure OCR |
-| Retrieval | Text/table BM25 indexes | BM25 + BGE-large + FAISS |
-| Table treatment | Score penalty ×0.8 | Rank-fusion boost ×2.0 |
-| Result combination | Sort weighted BM25 scores | Weighted RRF + CrossEncoder |
-| Query adaptation | Table-related keyword routing | Units, metadata hints, and question-type prompts |
-| Generation | Two-stage context expansion | Type-aware two-stage context expansion |
-
-<a id="en-data"></a>
-
-### Dataset & Repository
-
-| File | Records | Contents |
-| :--- | ---: | :--- |
-| `metadata.csv` | 32 | Document IDs, titles, years, citations, and source URLs |
-| `train_QA.csv` | 41 | Questions, gold answers, units, citations, and supporting evidence |
-| `test_Q.csv` | 282 | Test questions and expected units; answer fields are empty |
+## Project Structure
 
 ```text
 WattBot-RAG-System/
 ├── README.md
 ├── notebook/
-│   ├── v1_gemini_2_5pro.ipynb
-│   └── Gemini_2_5_pro_新pipeline_0_821.ipynb
+│   ├── v1_gemini_2_5pro.ipynb                 # BM25 baseline experiments
+│   └── Gemini_2_5_pro_新pipeline_0_821.ipynb   # HERO pipeline
 ├── data/
-│   ├── metadata.csv
-│   ├── train_QA.csv
-│   └── test_Q.csv
+│   ├── metadata.csv                         # 32 source documents
+│   ├── train_QA.csv                         # 41 training questions
+│   └── test_Q.csv                           # 282 test questions
 └── docs/
+    ├── images/                              # Architecture figures
     ├── WattBot2025_AttentionPlease_Technical_Report.pdf
     └── WattBot2025_AttentionPlease_Presentation.pdf
 ```
 
-The PDFs referenced by `metadata.csv` are downloaded separately; the two PDFs in `docs/` are the project report and presentation.
+## System Workflow
 
-<a id="en-setup"></a>
+```text
+Document preparation
+    ↓
+Download PDFs from metadata.csv
+    ↓
+Parse documents and extract text / tables / figure OCR
+    ↓
+Build retrieval indexes
+    ↓
+Read question and expected answer unit
+    ↓
+Retrieve and rank supporting evidence
+    ↓
+Generate structured answer with citations
+    ↓
+Expand context if the first attempt cannot answer
+    ↓
+Export submission CSV
+```
 
-### Getting Started
+Generation produces structured JSON, which is mapped to these submission fields:
 
-The notebooks target a **Google Colab-style environment** with `/content/` paths. They require manual setup and have not been converted into a standalone command-line application.
+| Field | Description |
+| :--- | :--- |
+| `id`, `question` | Question identifier and text |
+| `answer` | Natural-language answer |
+| `answer_value`, `answer_unit` | Normalized value and unit |
+| `ref_id`, `ref_url` | Supporting document IDs and URLs |
+| `supporting_materials` | Evidence excerpt |
+| `explanation` | Explanation connecting evidence to the answer |
 
-1. Open the [HERO notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb) in Colab, or Jupyter with paths adapted to your environment.
-2. Upload the three CSV files from `data/` to `/content/`. Review `DATA_DIR`, `PDF_DIR`, and `CHUNK_DIR` before execution.
-3. Install the dependencies used by the HERO workflow:
+## Dataset and Evaluation
+
+| File | Records | Content |
+| :--- | ---: | :--- |
+| `metadata.csv` | 32 | Document metadata and source URLs |
+| `train_QA.csv` | 41 | Questions with answers, citations, and evidence |
+| `test_Q.csv` | 282 | Test questions and expected units |
+
+Source PDFs are downloaded separately using the metadata URLs. The PDFs in `docs/` are the project report and presentation.
+
+| WattBot Score component | Weight | Criterion |
+| :--- | ---: | :--- |
+| Answer value | 75% | Numeric tolerance or normalized categorical match |
+| Reference IDs | 15% | Jaccard overlap of citation sets |
+| Unanswerable handling | 10% | Correct recognition of unavailable evidence |
+
+The report specifies **±0.1% relative tolerance** for numeric answers.
+
+## Experimental Results
+
+### Pipeline and Model Comparison
+
+| Model | BM25 Baseline | HERO |
+| :--- | ---: | ---: |
+| GPT-4o-mini | 0.753 | 0.789 |
+| GPT-4o | 0.768 | 0.811 |
+| GPT-5.1 | 0.778 | 0.807 |
+| Gemini 2.5 Pro | 0.807 | 0.821 |
+| **Gemini 3 Pro** | **0.853** | **0.886** |
+
+Reported WattBot Scores from [technical report Figure 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10). The best reported configuration is **HERO + Gemini 3 Pro (0.886)**; the public HERO notebook uses **Gemini 2.5 Pro (0.821 in the report)**.
+
+### What We Learned
+
+- **Table formatting affects retrieval.** More document content does not automatically produce better evidence ranking.
+- **Visual evidence needs its own ingestion path.** OCR makes information inside figures available to text retrieval.
+- **Retrieval and generation improve together.** HERO improves reported scores across all five evaluated models.
+- **Context expansion is a trade-off.** A second attempt can recover missed evidence, but requires careful handling of unsupported answers.
+
+<details>
+<summary>Retrieval evaluation and reproducibility details</summary>
+
+The baseline comparison uses 39 questions; the final saved HERO evaluation uses 41, including unanswerable examples. The HERO saved output reports Recall@10 of 95.12% and MRR of 0.8519. Some report values differ, so these runs should not be treated as a controlled comparison on identical samples.
+
+The notebooks label a top-K reference hit rate as Recall@K. Multiple chunks may come from the same document, so chunk ranking and unique-document ranking differ.
+
+The public HERO retrieval defaults to eight final chunks. Generation can request up to ten fallback chunks, but only uses the evidence supplied. Its query-based helper currently enables reranking for every query. Abstention uses heuristics and LLM responses rather than calibrated confidence.
+
+</details>
+
+## Quick Start
+
+### 1. Open a Notebook
+
+Use Google Colab for the `/content/` paths used by the notebooks, or adapt the paths for local Jupyter:
+
+- [Baseline notebook](notebook/v1_gemini_2_5pro.ipynb)
+- [HERO notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb)
+
+### 2. Prepare the Data
+
+Upload `metadata.csv`, `train_QA.csv`, and `test_Q.csv` from `data/` to `/content/`. Check the notebook's data, PDF, and chunk paths before running cells.
+
+### 3. Install HERO Dependencies
 
 ```python
 %pip install docling easyocr opencv-python-headless rank-bm25 sentence-transformers faiss-cpu pandas numpy requests pdfminer.six pillow tqdm google-genai
 ```
 
-4. Configure your Gemini API key in the generation cell. Prefer a secret store or environment variable over saving a key in the notebook:
+The baseline additionally uses Kaggle authentication, `pdfplumber`, `pdf2image`, `pytesseract`, `fuzzywuzzy`, and `python-Levenshtein`. Its OCR cells require Poppler and Tesseract system tools.
+
+### 4. Configure Gemini
+
+Replace the notebook's manual API-key/client initialization with your preferred secret source. For an environment variable:
 
 ```python
 import os
@@ -163,185 +233,270 @@ from google import genai
 client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
 ```
 
-   This snippet replaces the notebook's manual key/client setup; merely setting the environment variable does not change its existing cell.
-5. Run the ingestion, OCR, indexing, retrieval, and generation cells in order. Review optional evaluation and cache-cleanup cells separately; the notebooks contain exploratory code and environment-specific assumptions.
-6. The HERO generation cell writes `/content/submission_enhanced.csv`.
+### 5. Run the Pipeline
 
-The submission contains `id`, `question`, `answer`, `answer_value`, `answer_unit`, `ref_id`, `ref_url`, `supporting_materials`, and `explanation`. Generation first produces structured JSON and then maps it to these CSV columns.
+Run ingestion, indexing, retrieval, and generation in sequence. Review experimental, evaluation, and cache-cleanup cells before executing them.
 
-To explore the baseline, open its notebook separately. It additionally uses Kaggle authentication/downloads and packages such as `pdfplumber`, `pdf2image`, `pytesseract`, `fuzzywuzzy`, and `python-Levenshtein`; OCR cells use the Poppler and Tesseract system tools.
+The HERO generation cell saves:
 
-<a id="en-notes"></a>
+```text
+/content/submission_enhanced.csv
+```
 
-### Reproducibility & Evaluation Notes
+These are research notebooks with manual configuration, not a packaged command-line application. Dependencies are not pinned; model/API availability and source-document downloads may affect reproduction.
 
-- **Report versus code.** The report describes BGE-M3 with FAISS L2 and a different reranker configuration. The public HERO notebook uses BGE-large, normalized embeddings with FAISS inner-product search, and BGE-reranker-v2-m3. This README documents that public implementation.
-- **Published scores versus available artifact.** The best 0.886 result is attributed to Gemini 3 Pro in the report. The checked-in HERO notebook initializes Gemini 2.5 Pro; its filename is not evidence that the 0.886 configuration is included.
-- **Retrieval metrics need context.** The baseline comparison uses 39 queries, while the final HERO saved evaluation uses 41, including unanswerable examples. The saved HERO output reports Recall@10 = 95.12% and MRR = 0.8519; some report values differ. These runs should not be presented as a controlled comparison on an identical evaluation set.
-- **Recall definition.** The notebook's Recall@K checks whether any gold reference appears among the top-K results; it is a hit-rate measure. Multiple chunks can come from one document, so chunk ranks and unique-document ranks are not interchangeable.
-- **Abstention behavior.** The notebook uses keyword checks for some out-of-domain questions and an LLM fallback response. These heuristics do not establish calibrated confidence. Its fallback preserves the requested unit, which differs from the report's description of all unavailable fields becoming `is_blank`.
-- **Execution status.** This update checks documentation against the stored artifacts; it does not rerun PDF downloads, model inference, or paid Gemini requests. Dependencies are not pinned and API/model availability must be checked when reproducing.
+## Team Members
 
-<a id="en-team"></a>
+**Attention Please · National Chengchi University**
 
-### Team & Citation
+| Member | Affiliation in the technical report |
+| :--- | :--- |
+| Shao-Hua Wu‡ | Department of Money and Banking |
+| Pei-Ju Hsieh‡ | Department of Money and Banking |
+| Bo-Hao Chen‡ | Department of Money and Banking |
+| Yi-Chen Hsiao | Department of Finance |
+| Yi-Yang Xue | Department of Computer Science |
 
-**Team Attention Please · National Chengchi University**
+‡ Equal contribution, as marked in the technical report.
 
-Authors as listed in the technical report: **Shao-Hua Wu, Pei-Ju Hsieh, Bo-Hao Chen, Yi-Chen Hsiao, and Yi-Yang Xue**. The report marks the first three authors as equal contributors.
-
-For this repository and its accompanying report:
+## Citation
 
 ```bibtex
 @misc{wattbot2025_hero,
   title = {WattBot 2025: Retrieval-Augmented Generation for ESG Intelligence},
   author = {Wu, Shao-Hua and Hsieh, Pei-Ju and Chen, Bo-Hao and Hsiao, Yi-Chen and Xue, Yi-Yang},
   year = {2025},
-  howpublished = {GitHub repository and accompanying technical report},
   url = {https://github.com/AnnieHsieh-12/WattBot-RAG-System}
 }
 ```
 
-Thanks to the WattBot organizers and the open-source tools supporting this project. See the [technical report](docs/WattBot2025_AttentionPlease_Technical_Report.pdf) for related work, including the KohakuRAG case study that informed the team's design. The checked-in repository does not contain a `LICENSE` file; no license grant is asserted here.
-
-[Back to top](#wattbot--hero) · [繁體中文](#traditional-chinese)
+Related work and acknowledgments are included in the technical report. The repository currently does not include a license file.
 
 ---
 
-<a id="traditional-chinese"></a>
+## 中文版說明
 
-## 繁體中文
+## WattBot 2025：AI 環境影響的證據檢索與問答系統
 
-[專案介紹](#zh-overview) · [實驗成果](#zh-results) · [Baseline 架構](#zh-baseline) · [HERO 架構](#zh-hero) · [架構比較](#zh-comparison) · [資料與目錄](#zh-data) · [開始使用](#zh-setup) · [重現說明](#zh-notes) · [團隊與引用](#zh-team)
+**HERO（Hybrid Evidence Retrieval Optimization）** 是 Attention Please 團隊為 WattBot 2025 與政大自然語言處理期末專題開發的 RAG 系統，從學術論文與產業報告中擷取 AI 能耗、碳排、水資源與永續相關資訊。
 
-<a id="zh-overview"></a>
+[技術報告](docs/WattBot2025_AttentionPlease_Technical_Report.pdf) · [專案簡報](docs/WattBot2025_AttentionPlease_Presentation.pdf) · [Baseline notebook](notebook/v1_gemini_2_5pro.ipynb) · [HERO notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb) · [English](#table-of-contents)
 
-### 專案介紹
+## 中文目錄
 
-本專案由 **Attention Please 團隊**為 WattBot 2025 競賽與自然語言處理期末專題開發，透過檢索增強生成（RAG），從學術論文與產業報告中回答 AI 能耗、碳排、水資源與永續相關問題。
+- [專案介紹](#專案介紹)
+- [技術架構](#技術架構)
+- [系統架構](#系統架構)
+  - [Baseline：BM25 檢索](#baselinebm25-檢索)
+  - [HERO：結合視覺證據的混合檢索](#hero結合視覺證據的混合檢索)
+  - [架構比較](#架構比較)
+- [專案目錄](#專案目錄)
+- [系統流程](#系統流程)
+- [資料集與評分方式](#資料集與評分方式)
+- [實驗成果](#實驗成果)
+- [快速啟動](#快速啟動)
+- [團隊成員與引用](#團隊成員與引用)
 
-任務不只是產生流暢回答，還需要提供標準化數值、單位、文件引用與支持證據；證據不足時，必須明確表示無法作答。
+## 專案介紹
 
-**核心問題：表格悖論（The Table Paradox）。** 表格包含重要數值，但格式雜訊可能干擾 BM25。刪除表格雖然降低雜訊，也會失去關鍵證據。我們從 BM25 baseline 出發，透過版面解析、OCR、混合檢索與內容加權，逐步發展為 HERO。
+WattBot 的核心任務是：**找出支持 AI 永續資訊的實際證據。** 答案可能藏在表格的一個數值、圖像中的標籤，或使用不同單位的文獻段落中。
 
-<a id="zh-results"></a>
+系統除了回答問題，還需要提供標準化數值、單位、文件引用與支持內容；若資料不足，也必須辨識無法回答的情況。
 
-### 實驗成果
+本專案包含兩套方法：
 
-| Model | Baseline | HERO | Gain |
-| :--- | ---: | ---: | ---: |
-| GPT-4o-mini | 0.753 | 0.789 | +0.036 |
-| GPT-4o | 0.768 | 0.811 | +0.043 |
-| GPT-5.1 | 0.778 | 0.807 | +0.029 |
-| Gemini 2.5 Pro | 0.807 | 0.821 | +0.014 |
-| **Gemini 3 Pro** | **0.853** | **0.886** | **+0.033** |
+- **BM25 Baseline**：結合文字與表格檢索、問題路由，以及兩階段答案生成。
+- **HERO**：加入版面解析、OCR、稀疏與稠密檢索、加權排名融合、CrossEncoder 重排序及題型專屬提示詞。
 
-資料來源：[技術報告 Figure 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf) 與[簡報第 24 頁](docs/WattBot2025_AttentionPlease_Presentation.pdf)。上表是文件記錄的競賽成績，並非本次修改重新實測的結果。簡報標示「Top 1」，但 repo 沒有分別證明 public 與 private leaderboard 都是第一名的資料。
+研究的關鍵是**表格悖論（Table Paradox）**：加入原始表格可能干擾關鍵字檢索，刪除表格又會失去重要數值。HERO 保留內容類型，透過加權融合提高表格與 OCR 證據的可見度。
 
-WattBot Score 包含 **答案值 75%**、**引用文件 15%**、**無法作答判定 10%**。報告說明數值答案允許 ±0.1% 相對誤差，引用集合以 Jaccard overlap 計分。
+## 技術架構
 
-<a id="zh-baseline"></a>
+```text
+程式語言：     Python
+執行環境：     Jupyter Notebook / Google Colab
+Baseline 解析：PyMuPDF + pdfplumber
+HERO 解析：    Docling + EasyOCR + OpenCV
+稀疏檢索：     BM25 (rank-bm25)
+稠密檢索：     Sentence-Transformers + BGE-large + FAISS
+重排序：       BGE-reranker-v2-m3
+答案生成：     Google Gemini API
+資料處理：     pandas + NumPy
+```
 
-### Baseline 架構：雙 BM25 檢索
+上述設定以公開 notebook 為準；技術報告另包含其他實驗配置。
 
-[開啟 Baseline notebook](notebook/v1_gemini_2_5pro.ipynb)
+## 系統架構
 
-![技術報告 Figure 2：Baseline BM25 架構](docs/images/baseline-architecture.png)
+### Baseline：BM25 檢索
 
-*來源：[技術報告 Figure 2，第 5 頁](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=5)。原圖以純文字與混合 BM25 索引表示；下方說明的 notebook 路由實作則分開建立文字與表格索引。*
+![Baseline BM25 系統架構](docs/images/baseline-architecture.png)
 
-1. **整理文件證據。** 解析 PDF 並產生文字與表格區塊。Notebook 保留多個實驗版本，下方流程說明以 `hybrid_search` 的文字／表格路由設計為主。
-2. **建立雙索引。** 分別建立文字與表格的 BM25 索引。此處的 hybrid 指「混合內容類型」，不是稀疏與稠密檢索的結合。
-3. **依問題路由。** 一般問題取文字區塊；表格相關問題混合七個文字與三個表格區塊，表格分數乘上 **0.8** 後排序。
-4. **兩階段生成。** 先以較小上下文作答，無法回答時再擴大證據範圍，輸出答案值、單位、支持內容與引用。
+*擷取自[技術報告第 5 頁 Figure 2](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=5)。*
 
-**為什麼需要升級？** 關鍵字檢索較難處理同義詞、表格格式雜訊與圖像中的資訊。Baseline notebook 也保留其他檢索與生成路徑，因此應視為實驗紀錄，而非已封裝的單一執行程式。
+Baseline 將文件處理與問答分成以下步驟：
 
-<a id="zh-hero"></a>
+1. **文件擷取**：解析 PDF，整理文字與表格區塊。
+2. **建立索引**：使用 BM25 進行關鍵字與數值比對。
+3. **問題路由**：判斷是否為表格相關問題。Notebook 的 `hybrid_search` 對這類問題合併 **Top-7 文字 + Top-3 表格**，表格分數乘上 **0.8** 後排序；其他問題使用文字檢索。
+4. **答案生成**：先以較少證據作答，無法回答時再擴大上下文。
+5. **結構化輸出**：產生答案、數值、單位、引用、支持內容與解釋。
 
-### HERO 架構：結合視覺證據的混合檢索
+報告原圖以純文字與混合索引呈現，notebook 的路由版本則分開建立文字與表格索引。此處的 hybrid 指內容類型混合，這條 baseline 路徑尚未結合向量檢索。
 
-[開啟 HERO notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb)
+### HERO：結合視覺證據的混合檢索
 
-![技術報告 Figure 4：HERO 架構](docs/images/hero-architecture.png)
+![HERO 系統架構](docs/images/hero-architecture.png)
 
-*來源：[技術報告 Figure 4，第 7 頁](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=7)。原圖呈現報告中的 BGE-M3 設定；公開 notebook 使用 BGE-large，實際設定見下方說明。*
+*擷取自[技術報告第 7 頁 Figure 4](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=7)。*
 
-| 階段 | 公開實作 | 目的 |
+HERO 在 Baseline 基礎上加入五個階段：
+
+1. **視覺證據擷取**：Docling 解析文件元素，EasyOCR 與 OpenCV 擷取圖像中的文字，保留區塊類型與文件 ID。
+2. **雙路檢索**：BM25 比對精確詞彙與數值，稠密向量補足語意相近但用詞不同的證據。
+3. **加權倒數排名融合**：透過 RRF 合併排名，設定**表格 ×2.0、OCR ×1.8、作者／年份匹配 ×2.0**。
+4. **CrossEncoder 重排序**：聯合評估問題與候選區塊，優先保留相關證據。
+5. **自適應生成**：依題型選擇提示詞，先用 Top-3 上下文回答，需要第二次嘗試時再擴大傳入的證據範圍。
+
+原圖標示的模型為 **BGE-M3**；公開 notebook 實際使用 **BGE-large-en-v1.5**、正規化向量的 FAISS `IndexFlatIP` 與 **BGE-reranker-v2-m3**，並提供 MiniLM 載入失敗備援。
+
+### 架構比較
+
+| 元件 | BM25 Baseline | HERO |
 | :--- | :--- | :--- |
-| 文件處理 | Docling + EasyOCR + OpenCV | 擷取文字、結構化表格與圖像內文字 |
-| 稀疏檢索 | BM25 + 強化斷詞 | 比對技術名詞、數值與年份 |
-| 稠密檢索 | `BAAI/bge-large-en-v1.5` + FAISS `IndexFlatIP` | 使用正規化向量找出語意相關證據 |
-| 查詢增強 | 單位擴展 + 作者／年份提示 | 連結縮寫單位與領域詞彙 |
-| 排名融合 | 加權倒數排名融合（RRF） | 合併兩種排名，提高表格、OCR 與元資料匹配權重 |
-| 重排序 | `BAAI/bge-reranker-v2-m3` | 聯合評估問題與候選區塊的相關性 |
-| 答案生成 | Gemini 2.5 Pro + 題型專屬提示詞 | 根據問題類型調整上下文並生成結構化答案 |
-| 結果匯出 | pandas → CSV | 組合答案、引用、支持證據與解釋 |
+| 文件解析 | PyMuPDF / pdfplumber | Docling + EasyOCR |
+| 證據來源 | 文字與表格 | 文字、表格與圖像 OCR |
+| 檢索方式 | 文字／表格 BM25 索引 | BM25 + 稠密向量搜尋 |
+| 表格處理 | BM25 分數權重 ×0.8 | RRF 權重 ×2.0 |
+| 結果排序 | 加權 BM25 分數 | 加權 RRF + CrossEncoder |
+| 查詢調整 | 表格相關問題路由 | 單位擴展與元資料提示 |
+| 答案生成 | 兩階段 fallback | 題型提示詞與兩階段 fallback |
 
-**證據如何流動？** 離線階段先將 PDF 轉為帶有類型標籤的區塊，建立稀疏與稠密索引；線上階段搜尋兩個索引、融合排名，再以 CrossEncoder 重排序。生成器依表格、模型數值、分數、術語與數值擷取等題型套用提示詞。
-
-**為什麼使用加權 RRF？** BM25 與向量分數的尺度不同，RRF 以排名合併結果。表格權重為 **2.0 倍**、圖像 OCR 為 **1.8 倍**、作者／年份匹配為 **2.0 倍**；元資料權重可與內容類型權重相乘。
-
-**上下文受檢索結果限制。** `adaptive_search_final` 預設保留 100 個融合候選，再取八個重排序結果。第二階段生成雖可要求七個或十個區塊，實際仍只能使用傳入的證據數量。目前 query-based helper 對所有問題都啟用重排序。
-
-**備援模型。** BGE-large 載入失敗時嘗試 `all-MiniLM-L6-v2`；重排序模型則備援為 `ms-marco-MiniLM-L-12-v2`。
-
-<a id="zh-comparison"></a>
-
-### Baseline 與 HERO 比較
-
-| 面向 | Baseline 路由版本 | HERO 公開 notebook |
-| :--- | :--- | :--- |
-| PDF 處理 | PyMuPDF／pdfplumber 實驗 | Docling + EasyOCR |
-| 證據類型 | 文字與表格 | 文字、表格與圖像 OCR |
-| 檢索方式 | 文字／表格雙 BM25 索引 | BM25 + BGE-large + FAISS |
-| 表格處理 | 分數降權 ×0.8 | 排名融合加權 ×2.0 |
-| 結果整合 | 依加權 BM25 分數排序 | 加權 RRF + CrossEncoder |
-| 查詢調整 | 表格關鍵字路由 | 單位、元資料與題型提示詞 |
-| 答案生成 | 兩階段擴大上下文 | 依題型調整的兩階段上下文 |
-
-<a id="zh-data"></a>
-
-### 資料與專案目錄
-
-| 檔案 | 筆數 | 內容 |
-| :--- | ---: | :--- |
-| `metadata.csv` | 32 | 文件 ID、標題、年份、引用與來源網址 |
-| `train_QA.csv` | 41 | 問題、標準答案、單位、引用與支持證據 |
-| `test_Q.csv` | 282 | 測試問題與預期單位，答案欄位留空 |
+## 專案目錄
 
 ```text
 WattBot-RAG-System/
 ├── README.md
 ├── notebook/
-│   ├── v1_gemini_2_5pro.ipynb
-│   └── Gemini_2_5_pro_新pipeline_0_821.ipynb
+│   ├── v1_gemini_2_5pro.ipynb                 # BM25 baseline experiments
+│   └── Gemini_2_5_pro_新pipeline_0_821.ipynb   # HERO pipeline
 ├── data/
-│   ├── metadata.csv
-│   ├── train_QA.csv
-│   └── test_Q.csv
+│   ├── metadata.csv                         # 32 source documents
+│   ├── train_QA.csv                         # 41 training questions
+│   └── test_Q.csv                           # 282 test questions
 └── docs/
+    ├── images/                              # Architecture figures
     ├── WattBot2025_AttentionPlease_Technical_Report.pdf
     └── WattBot2025_AttentionPlease_Presentation.pdf
 ```
 
-原始文獻 PDF 需依 `metadata.csv` 另行下載；`docs/` 中的兩份 PDF 是本專案的技術報告與簡報。
+## 系統流程
 
-<a id="zh-setup"></a>
+```text
+準備文件
+    ↓
+依 metadata.csv 下載 PDF
+    ↓
+解析文字、表格與圖像 OCR
+    ↓
+建立檢索索引
+    ↓
+讀取問題與預期單位
+    ↓
+檢索並排序支持證據
+    ↓
+生成結構化答案與引用
+    ↓
+第一次無法作答時擴大上下文
+    ↓
+匯出 submission CSV
+```
 
-### 開始使用
+生成器先產生結構化 JSON，再轉換成競賽欄位：
 
-Notebook 以 **Google Colab 類型環境**為主，使用 `/content/` 路徑，需要手動設定，尚未整理為獨立命令列應用程式。
+| 欄位 | 說明 |
+| :--- | :--- |
+| `id`、`question` | 問題編號與內容 |
+| `answer` | 自然語言答案 |
+| `answer_value`、`answer_unit` | 標準化答案值與單位 |
+| `ref_id`、`ref_url` | 支持文件 ID 與網址 |
+| `supporting_materials` | 證據摘錄 |
+| `explanation` | 證據如何支持答案 |
 
-1. 在 Colab 開啟 [HERO notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb)；若使用本機 Jupyter，先調整路徑。
-2. 將 `data/` 的三份 CSV 上傳至 `/content/`，檢查 `DATA_DIR`、`PDF_DIR` 與 `CHUNK_DIR`。
-3. 安裝 HERO 流程使用的套件：
+## 資料集與評分方式
+
+| 檔案 | 筆數 | 內容 |
+| :--- | ---: | :--- |
+| `metadata.csv` | 32 | 文件資訊與來源網址 |
+| `train_QA.csv` | 41 | 問題、標準答案、引用與證據 |
+| `test_Q.csv` | 282 | 測試問題與預期單位 |
+
+原始文獻需依 metadata 網址另外下載；`docs/` 的 PDF 是專案報告與簡報。
+
+| WattBot Score 項目 | 權重 | 評分依據 |
+| :--- | ---: | :--- |
+| 答案值 | 75% | 數值誤差或標準化類別比對 |
+| 引用文件 | 15% | 引用集合的 Jaccard overlap |
+| 無法作答判定 | 10% | 正確辨識缺乏證據的問題 |
+
+報告設定數值答案的容許相對誤差為 **±0.1%**。
+
+## 實驗成果
+
+### 不同模型與 Pipeline 比較
+
+| Model | BM25 Baseline | HERO |
+| :--- | ---: | ---: |
+| GPT-4o-mini | 0.753 | 0.789 |
+| GPT-4o | 0.768 | 0.811 |
+| GPT-5.1 | 0.778 | 0.807 |
+| Gemini 2.5 Pro | 0.807 | 0.821 |
+| **Gemini 3 Pro** | **0.853** | **0.886** |
+
+成績來自[技術報告 Figure 5](docs/WattBot2025_AttentionPlease_Technical_Report.pdf#page=10)。最佳配置為 **HERO + Gemini 3 Pro（0.886）**；公開 HERO notebook 使用 **Gemini 2.5 Pro（報告成績 0.821）**。
+
+### 主要發現
+
+- **表格格式會影響檢索。** 增加內容不一定能提升證據排序品質。
+- **視覺資訊需要獨立擷取。** OCR 讓圖像中的資訊進入文字檢索流程。
+- **檢索與生成需要一起優化。** 報告中五種模型搭配 HERO 都有成績提升。
+- **擴大上下文需要取捨。** 第二次生成能補回遺漏證據，也需要避免無證據推論。
+
+<details>
+<summary>檢索評估與重現細節</summary>
+
+Baseline 比較使用 39 題，HERO 最後留存的評估使用 41 題，包含不可回答問題。HERO 輸出記錄 Recall@10 為 95.12%、MRR 為 0.8519，部分報告數值不同，因此不能視為同一樣本上的控制比較。
+
+Notebook 將前 K 個結果命中任一標準引用的比例稱為 Recall@K；多個區塊可能來自同一文件，區塊排名與去重後的文件排名不同。
+
+公開 HERO 檢索預設保留八個最終區塊。生成器雖可要求最多十個 fallback 區塊，仍受實際傳入證據數量限制。目前 query-based helper 對所有問題啟用重排序。拒答使用規則與 LLM 回應，不是經過校準的信心估計。
+
+</details>
+
+## 快速啟動
+
+### 1. 開啟 Notebook
+
+建議使用 Google Colab，配合 notebook 的 `/content/` 路徑；使用本機 Jupyter 時請先調整路徑。
+
+- [Baseline notebook](notebook/v1_gemini_2_5pro.ipynb)
+- [HERO notebook](notebook/Gemini_2_5_pro_新pipeline_0_821.ipynb)
+
+### 2. 準備資料
+
+將 `data/` 中的 `metadata.csv`、`train_QA.csv`、`test_Q.csv` 上傳至 `/content/`，確認資料、PDF 與區塊輸出路徑。
+
+### 3. 安裝 HERO 套件
 
 ```python
 %pip install docling easyocr opencv-python-headless rank-bm25 sentence-transformers faiss-cpu pandas numpy requests pdfminer.six pillow tqdm google-genai
 ```
 
-4. 在生成階段設定 Gemini API key。建議透過秘密管理工具或環境變數提供，不要將金鑰儲存在 notebook：
+Baseline 另外使用 Kaggle 登入、`pdfplumber`、`pdf2image`、`pytesseract`、`fuzzywuzzy` 與 `python-Levenshtein`；OCR cell 需要 Poppler 與 Tesseract 系統工具。
+
+### 4. 設定 Gemini
+
+將 notebook 手動設定 API key 與 client 的部分改為你的秘密管理方式。例如從環境變數讀取：
 
 ```python
 import os
@@ -350,33 +505,30 @@ from google import genai
 client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
 ```
 
-   上述程式用來替換原本手動設定 key 與 client 的部分；只設定環境變數，不會自動改變現有 cell。
-5. 依序執行文件下載、解析、OCR、索引、檢索與生成。評估與清除快取 cell 請另外檢查；notebook 保留探索性程式與環境假設。
-6. HERO 的生成 cell 會輸出 `/content/submission_enhanced.csv`。
+### 5. 執行流程
 
-輸出欄位包含 `id`、`question`、`answer`、`answer_value`、`answer_unit`、`ref_id`、`ref_url`、`supporting_materials` 與 `explanation`。生成器先產生結構化 JSON，再轉換為 CSV 欄位。
+依序執行文件處理、索引、檢索與生成。探索性實驗、評估與清除快取 cell 請先檢查再執行。
 
-若要研究 Baseline，請另外開啟其 notebook。它還使用 Kaggle 登入／下載，以及 `pdfplumber`、`pdf2image`、`pytesseract`、`fuzzywuzzy`、`python-Levenshtein` 等套件；OCR cell 使用 Poppler 與 Tesseract 系統工具。
+HERO 生成階段的輸出位置：
 
-<a id="zh-notes"></a>
+```text
+/content/submission_enhanced.csv
+```
 
-### 重現與評估說明
+目前為需要手動設定的研究 notebook。套件未固定版本，模型／API 可用性與原始文獻下載狀態可能影響重現。
 
-- **報告與程式設定不同。** 報告描述 BGE-M3、FAISS L2 與不同的 reranker 設定；公開 HERO notebook 實際使用 BGE-large、正規化向量的 FAISS 內積搜尋，以及 BGE-reranker-v2-m3。本 README 的實作說明以公開程式為準。
-- **最佳成績與公開版本分開看。** 報告將 0.886 歸於 Gemini 3 Pro；公開 HERO notebook 初始化 Gemini 2.5 Pro，檔名不代表包含 0.886 的完整設定。
-- **檢索指標需標明評估範圍。** Baseline 比較使用 39 題，HERO 最後留存的評估使用 41 題，包含不可回答問題。HERO 輸出記錄 Recall@10 為 95.12%、MRR 為 0.8519，部分數值與報告不同，不能直接當成同一評估集上的控制實驗。
-- **Recall 的定義。** Notebook 的 Recall@K 判斷前 K 個結果是否命中任一標準引用，實際上是命中率。多個區塊可能來自同一文件，因此區塊排名與去重後的文件排名不同。
-- **拒答的實際行為。** 部分領域外問題以關鍵字阻擋，其餘交由 LLM 判斷；這些規則不代表已校準的信心分數。程式的預設拒答保留預期單位，與報告描述的不可用欄位全部設為 `is_blank` 有差異。
-- **本次驗證範圍。** 文件更新依現有資料核對，沒有重新下載全部文獻、執行模型推論或呼叫付費 Gemini API。套件未固定版本，重現時需確認模型與 API 可用性。
+## 團隊成員與引用
 
-<a id="zh-team"></a>
+**Attention Please · 國立政治大學**
 
-### 團隊與引用
+| 成員 | 技術報告所列系所 |
+| :--- | :--- |
+| Shao-Hua Wu‡ | 金融學系 |
+| Pei-Ju Hsieh‡ | 金融學系 |
+| Bo-Hao Chen‡ | 金融學系 |
+| Yi-Chen Hsiao | 財務管理學系 |
+| Yi-Yang Xue | 資訊科學系 |
 
-**Attention Please 團隊 · 國立政治大學**
+‡ 技術報告標示共同貢獻。引用格式請見 [Citation](#citation)；相關研究與致謝收錄於技術報告。目前 repo 未提供授權檔案。
 
-依技術報告列名：**Shao-Hua Wu、Pei-Ju Hsieh、Bo-Hao Chen、Yi-Chen Hsiao、Yi-Yang Xue**。報告將前三位作者標示為共同貢獻。
-
-引用資訊請使用[英文區的 BibTeX](#en-team)，網址已指向本專案。感謝 WattBot 主辦單位與開源工具社群；相關研究與啟發設計的 KohakuRAG 案例，可參閱[技術報告](docs/WattBot2025_AttentionPlease_Technical_Report.pdf)。目前 repo 未包含 `LICENSE` 檔案，此處不宣告授權條款。
-
-[回到英文版](#english) · [回到頂端](#wattbot--hero)
+[回到英文版](#table-of-contents) · [回到中文目錄](#中文目錄)
